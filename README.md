@@ -15,3 +15,4 @@
 ### Shishir Pai - Role: Task and Docs Lead
 - I plan to work on the [API integration](https://github.com/namhnguyen0103/UStep/issues/3?issue=namhnguyen0103%7CUStep%7C11) with health connect
 - I plan to work on [data storage](https://github.com/namhnguyen0103/UStep/issues/3?issue=namhnguyen0103%7CUStep%7C6)
+- I plan to work on [auth/signup/login](https://github.com/namhnguyen0103/UStep/issues/8)
