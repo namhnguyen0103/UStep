@@ -6,6 +6,6 @@
 - Why this Project? This promotes people to stay active, while making the process fun. It is especially relevant in a college environment, where students are often stressed and sometimes neglect their physical well-being.
 ## Team Members
 ### Shaswat Ganisshan
-### Arnav Sodhani
+### Arnav Sodhani - Role: Quality and Deadline Manager 
 ### Nam Nguyen
 ### Shishir Pai
