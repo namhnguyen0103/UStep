@@ -5,7 +5,7 @@
 - Key Features: Integration with step tracking software like apple health, samsung health, leaderboard, analysis of their steps with charts and graphs, adding friends and seeing their analysis
 - Why this Project? This promotes people to stay active, while making the process fun. It is especially relevant in a college environment, where students are often stressed and sometimes neglect their physical well-being.
 ## Team Members
-### Shaswat Ganisshan
+### Shaswat Ganisshan - Role: Project Manager
 ### Arnav Sodhani - Role: Quality and Deadline Manager; Three Issues I Plan To Work On: 
 ### Nam Nguyen
 ### Shishir Pai
