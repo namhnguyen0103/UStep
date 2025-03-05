@@ -11,4 +11,4 @@
 
 ### Arnav Sodhani - Role: Quality and Deadline Manager; Three Issues I Plan To Work On: 
 ### Nam Nguyen
-### Shishir Pai
+### Shishir Pai - Role: Task and Docs Lead
