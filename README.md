@@ -8,6 +8,9 @@
 ### Shaswat Ganisshan
 ##### Role: Project Manager
 ##### Three Issues I Plan to Work On:
+- I plan to work on being a [Project Manager](https://github.com/namhnguyen0103/UStep/issues/10)
+- I plan to work on the [Dashboard Screen](https://github.com/namhnguyen0103/UStep/issues/2?issue=namhnguyen0103%7CUStep%7C7)
+- I plan to work on the [Landing Page Screen](https://github.com/namhnguyen0103/UStep/issues/2?issue=namhnguyen0103%7CUStep%7C5)
 
 ### Arnav Sodhani - Role: Quality and Deadline Manager; Three Issues I Plan To Work On: 
 ### Nam Nguyen
