@@ -14,6 +14,8 @@
 
 ### Arnav Sodhani - Role: Quality and Deadline Manager; Three Issues I Plan To Work On: 
 ### Nam Nguyen
+##### Role: Communication Manager
+##### Three Issues I Plan to Work On:
 
 ### Shishir Pai - Role: Task and Docs Lead
 - I plan to work on the [API integration](https://github.com/namhnguyen0103/UStep/issues/3?issue=namhnguyen0103%7CUStep%7C11) with health connect
