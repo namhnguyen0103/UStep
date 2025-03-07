@@ -16,9 +16,9 @@
 ### Nam Nguyen
 ##### Role: Communication Manager
 ##### Three Issues I Plan to Work On:
-- I plan to work on the [Login Screen]
-- I plan to work on the [Sign Up Screen]
-- I plan to work on the [Person Data Structure]
+- I plan to work on the [Login Screen](https://github.com/namhnguyen0103/UStep/issues/9)
+- I plan to work on the [Sign Up Screen](https://github.com/namhnguyen0103/UStep/issues/8)
+- I plan to work on the [Person Data Structure](https://github.com/namhnguyen0103/UStep/issues/6)
 
 ### Shishir Pai - Role: Task and Docs Lead
 - I plan to work on the [API integration](https://github.com/namhnguyen0103/UStep/issues/3?issue=namhnguyen0103%7CUStep%7C11) with health connect
