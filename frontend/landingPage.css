@@ -20,18 +20,19 @@
 
 #heroContainer {
     height: 450px;
-    background-color: #FF3D00;
+    background-color: #FFE9E9;
     font-size: 48px;
     font-weight: 800;
-    color: white;
+    color: #D50000;
     text-align: center;
+    padding-top: 2rem;
     margin-bottom: 3rem;
 }
 
 #join-now-button {
     height: 45px; 
     width: 90px; 
-    background-color: #D50201; 
+    background-color: #D50000; 
     color: white;
     text-align: center;
     border: 0;
@@ -40,8 +41,8 @@
 
 #callToActionContainer {
     height: 450px;
-    background-color: #FF3D00;
-    color: white;
+    background-color: #FFE9E9;
+    color: #D50000;
 }
 
 #footerContainer {
@@ -69,9 +70,9 @@
 }
 
 #getStartedButton {
-    background-color: white; 
+    background-color: #D50000; 
     padding: 1.5rem; 
-    color: #FF3D00; 
+    color: white; 
     text-align: center; 
     border: 0; 
     font-size: 26px; 
@@ -111,7 +112,7 @@
 .dot {
     height: 45px;
     width: 45px;
-    background-color: #D50201;
+    background-color: #D50000;
     border-radius: 50%;
     display: inline-block;
     margin-right: 10px;
