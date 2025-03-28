@@ -1,0 +1,124 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: normal;
+  }
+
+#headerContainer {
+    height: 60px;
+    font-size: 15px;
+}
+
+#appTitle {
+    font-size: 20px;
+    font-weight: bold;
+    font-style: italic;
+}
+
+#heroContainer {
+    height: 450px;
+    background-color: #FF3D00;
+    font-size: 48px;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+#join-now-button {
+    height: 45px; 
+    width: 90px; 
+    background-color: #D50201; 
+    color: white;
+    text-align: center;
+    border: 0;
+    font-size: 15px;
+}
+
+#callToActionContainer {
+    height: 450px;
+    background-color: #FF3D00;
+    color: white;
+}
+
+#footerContainer {
+    height: 100px;
+}
+
+.rowSpacedLayout {
+    padding: 0 4rem 0 4rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#headerContainer div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#footerContainer div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#getStartedButton {
+    background-color: white; 
+    padding: 1.5rem; 
+    color: #FF3D00; 
+    text-align: center; 
+    border: 0; 
+    font-size: 26px; 
+    font-weight: 700; 
+    font-style: italic;
+}
+
+.listContainer {
+    margin: 0 2rem 0 2rem;
+    text-align: center;
+}
+
+.itemsContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5rem 0 5rem;
+    margin-bottom: 5rem;
+}
+
+.itemContainer {
+    width: 13rem;
+}
+
+.itemContainer > h3 {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.itemContainer > p {
+    font-size: 20px;
+    font-weight: 300;
+}
+
+.dot {
+    height: 45px;
+    width: 45px;
+    background-color: #D50201;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+h2 {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 4rem;
+}
