@@ -13,8 +13,8 @@
 ##### Role: Project Manager
 ##### Three Issues I Plan to Work On:
 - I plan to work on being a [Project Manager](https://github.com/namhnguyen0103/UStep/issues/10)
-- I plan to work on the [Dashboard Screen](https://github.com/namhnguyen0103/UStep/issues/2?issue=namhnguyen0103%7CUStep%7C7)
-- I plan to work on the [Landing Page Screen](https://github.com/namhnguyen0103/UStep/issues/2?issue=namhnguyen0103%7CUStep%7C5)
+- I plan to work on the [Login Screen](https://github.com/namhnguyen0103/UStep/issues/9)
+- I plan to work on the [Sign Up Screen](https://github.com/namhnguyen0103/UStep/issues/8)
 
 ### Arnav Sodhani 
 ##### Role: Quality and Deadline Manager
@@ -27,9 +27,9 @@
 ### Nam Nguyen
 ##### Role: Communication Manager
 ##### Three Issues I Plan to Work On:
-- I plan to work on the [Login Screen](https://github.com/namhnguyen0103/UStep/issues/9)
-- I plan to work on the [Sign Up Screen](https://github.com/namhnguyen0103/UStep/issues/8)
+- I plan to work on the [Dashboard Screen](https://github.com/namhnguyen0103/UStep/issues/2?issue=namhnguyen0103%7CUStep%7C7)
 - I plan to work on the [Person Data Structure](https://github.com/namhnguyen0103/UStep/issues/6)
+- I plan to work on the [Landing Page Screen](https://github.com/namhnguyen0103/UStep/issues/2?issue=namhnguyen0103%7CUStep%7C5)
 
 ### Shishir Pai 
 ##### Role: Task and Docs Lead
