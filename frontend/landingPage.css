@@ -5,11 +5,11 @@
     font-optical-sizing: auto;
     font-style: normal;
     font-weight: normal;
-  }
+    color: #191919
+}
 
 #headerContainer {
     height: 60px;
-    font-size: 15px;
 }
 
 #appTitle {
@@ -18,18 +18,26 @@
     font-style: italic;
 }
 
+#headerContainer p {
+    font-size: 15px;
+    font-weight: bold;
+}
+
 #heroContainer {
     height: 450px;
-    background-color: #FFE9E9;
-    font-size: 48px;
-    font-weight: 800;
-    color: #D50000;
-    text-align: center;
+    background-color: #FCF1EE;
     padding-top: 2rem;
     margin-bottom: 3rem;
 }
 
-#join-now-button {
+#missionStatement {
+    font-size: 48px;
+    font-weight: 800;
+    color: #D50000;
+    text-align: center;
+}
+
+#joinNowButton {
     height: 45px; 
     width: 90px; 
     background-color: #D50000; 
@@ -37,16 +45,22 @@
     text-align: center;
     border: 0;
     font-size: 15px;
+    font-weight: bold;
 }
 
 #callToActionContainer {
     height: 450px;
-    background-color: #FFE9E9;
+    background-color: #FCF1EE;
     color: #D50000;
 }
 
 #footerContainer {
     height: 100px;
+    background-color: #191919;
+}
+
+#footerContainer p {
+    color: white;
 }
 
 .rowSpacedLayout {
@@ -57,13 +71,7 @@
     justify-content: space-between;
 }
 
-#headerContainer div {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-#footerContainer div {
+#headerContainer div, #footerContainer div {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -75,7 +83,7 @@
     color: white; 
     text-align: center; 
     border: 0; 
-    font-size: 26px; 
+    font-size: 20px; 
     font-weight: 700; 
     font-style: italic;
 }
