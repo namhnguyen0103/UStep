@@ -16,104 +16,165 @@
     <!-- Header -->
     <div id="headerContainer" class="rowSpacedLayout">
       <div>
-        <span class="dot"></span>
-        <p style="font-size: 20px; font-style: italic">UStep</p>
+        <a
+          href="index.html"
+          style="text-decoration: none; display: flex; align-items: center"
+        >
+          <span class="dot"></span>
+          <p id="appTitle">UStep</p>
+        </a>
       </div>
-      <div>
-        <div style="margin-right: 25px">
+      <div id="navLinks">
+        <a href="loginPage.html" class="headerLink" style="margin-right: 25px">
           <img
             src="./assets/user.svg"
-            style="width: 30px; height: 30px; margin-right: 3px"
+            style="
+              width: 30px;
+              height: 30px;
+              margin-right: 3px;
+              vertical-align: middle;
+            "
           />
-          <p>My Account</p>
-        </div>
-        <button id="joinNowButton">Join now</button>
+          <p style="display: inline-block; vertical-align: middle">
+            My Account
+          </p>
+        </a>
+        <a
+          href="signUpPage.html"
+          id="joinNowButton"
+          class="button button-primary"
+          >Join now</a
+        >
       </div>
     </div>
+
     <!-- Hero Section -->
     <div id="heroContainer">
-      <p id="missionStatement">BIG BOLD MISSION STATEMENT</p>
+      <p id="missionStatement">Your Steps, Your Journey, Together.</p>
     </div>
+
     <!-- Feature Section -->
     <div class="listContainer">
       <h2>HOW IT WORKS / FEATURES</h2>
       <!-- Features -->
       <div class="itemsContainer">
         <div class="itemContainer">
-          <img src="./assets/cloud_red.svg" />
-          <h3>Feature 1</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <img src="./assets/cloud_red.svg" alt="Cloud Icon" />
+          <h3>Track Your Steps</h3>
+          <p>
+            Connect with Apple Health or Samsung Health to automatically sync
+            your steps.
+          </p>
         </div>
         <div class="itemContainer">
-          <img src="./assets/pin_red.svg" />
-          <h3>Feature 2</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <img src="./assets/pin_red.svg" alt="Pin Icon" />
+          <h3>Visualize Progress</h3>
+          <p>
+            See your activity trends with insightful charts and graphs over
+            time.
+          </p>
         </div>
         <div class="itemContainer">
-          <img src="./assets/iPhone_red.svg" />
-          <h3>Feature 3</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <img src="./assets/iPhone_red.svg" alt="Phone Icon" />
+          <h3>Compete with Friends</h3>
+          <p>
+            Add friends, view their progress, and climb the leaderboard
+            together.
+          </p>
         </div>
       </div>
     </div>
-    <hr
-      style="
-        margin: 0 4rem 5rem 4rem;
-        background-color: #dadada;
-        border: 0;
-        height: 1px;
-      "
-    />
+    <hr class="section-divider" />
+
     <!-- Benefit Section -->
     <div class="listContainer">
       <h2>BENEFITS</h2>
       <!-- Benefits -->
       <div class="itemsContainer">
         <div class="itemContainer">
-          <img src="./assets/cloud_red.svg" />
-          <h3>Benefit 1</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <img src="./assets/cloud_red.svg" alt="Cloud Icon" />
+          <h3>Stay Motivated</h3>
+          <p>
+            Gamified experience and social features keep you engaged and moving.
+          </p>
         </div>
         <div class="itemContainer">
-          <img src="./assets/pin_red.svg" />
-          <h3>Benefit 2</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <img src="./assets/pin_red.svg" alt="Pin Icon" />
+          <h3>Understand Activity</h3>
+          <p>
+            Gain awareness of your daily activity levels and make healthier
+            choices.
+          </p>
         </div>
         <div class="itemContainer">
-          <img src="./assets/iPhone_red.svg" />
-          <h3>Benefit 3</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <img src="./assets/iPhone_red.svg" alt="Phone Icon" />
+          <h3>Build Community</h3>
+          <p>Connect with friends and support each other's fitness goals.</p>
         </div>
       </div>
     </div>
+
     <!-- Call to Action Section -->
     <div id="callToActionContainer" class="rowSpacedLayout">
       <div style="align-items: left; max-width: 45%">
         <div style="margin-bottom: 3rem">
-          <p style="font-size: 40px; font-weight: 700; margin-bottom: 1rem">
-            Looking to get fit?
+          <p
+            style="
+              font-size: 40px;
+              font-weight: 700;
+              margin-bottom: 1rem;
+              color: #191919;
+            "
+          >
+            Ready to Step Up?
           </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel
-            orci gravida, faucibus eros eu, finibus sem. Nunc congue sit amet
-            est id tincidunt. Sed viverra ante a nunc sagittis, eget sodales
-            risus cursus.
+          <p style="color: #191919">
+            Join UStep today and turn your daily walks into a fun, engaging, and
+            social fitness journey. Sign up now!
           </p>
         </div>
-        <button id="getStartedButton">Get started</button>
+        <a
+          href="signUpPage.html"
+          id="getStartedButton"
+          class="button button-large"
+          >Get started</a
+        >
       </div>
       <div style="align-self: flex-end">
-        <div style="width: 350px; height: 400px; background-color: #f5f5f5">
+        <!-- Placeholder -->
+        <img
+          src="./assets/running.png"
+          alt="Runner illustration"
+          style="
+            width: 350px;
+            height: auto;
+            display: block;
+            margin-bottom: -4px;
+          "
+        />
+        <!-- placeholder TODO -->
+        <!-- <div style="width: 350px; height: 400px; background-color: #F5F5F5">
           <p>Image here</p>
-        </div>
+        </div> -->
       </div>
     </div>
+
     <!-- Footer -->
     <div id="footerContainer" class="rowSpacedLayout">
       <p>©2025 UStep</p>
       <div>
         <p style="margin-right: 15px">Follow us:</p>
-        <img src="./assets/github-mark-white.svg" style="width: 35px" />
+        <a
+          href="https://github.com/namhnguyen0103/UStep"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src="./assets/github-mark-white.svg"
+            style="width: 35px; vertical-align: middle"
+            alt="GitHub Icon"
+          />
+        </a>
       </div>
     </div>
   </body>
