@@ -17,7 +17,7 @@
         <p class="auth-switch-link">
           Already have an account? <a href="loginPage.html">Login</a>
         </p>
-        <form>
+        <form id="signupForm">
           <label for="username">Username</label>
           <input type="text" id="username" name="username" required />
 
@@ -27,6 +27,10 @@
           <label for="password">Password</label>
           <input type="password" id="password" name="password" required />
 
+          <div id="passwordStrength" class="password-strength"></div>
+
+          <div id="formMessage" class="form-message"></div>
+
           <button type="submit" class="button button-primary button-full">
             Create an account
           </button>
@@ -34,5 +38,7 @@
         <p class="auth-home-link"><a href="index.html">Back to Home</a></p>
       </div>
     </div>
+
+    <script type="module" src="js/signup.js"></script>
   </body>
 </html>
