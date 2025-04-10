@@ -1,4 +1,4 @@
-import UserDatabase from "./userdb.js";
+import { UserDatabase } from "./userdb.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   const accountLink = document.querySelector('a[href="loginPage.html"]');

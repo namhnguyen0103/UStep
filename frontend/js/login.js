@@ -1,4 +1,4 @@
-import UserDatabase from "./userdb.js";
+import { UserDatabase } from "./userdb.js";
 import { showMessage } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", function () {
