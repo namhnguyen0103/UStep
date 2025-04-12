@@ -47,8 +47,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return Promise.resolve();
     } catch (error) {
       return Promise.reject(`Error during logout: ${error.message}`);
-    } 
+    }
   }
+
+
 });
 
 
