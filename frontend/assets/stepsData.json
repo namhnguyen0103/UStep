@@ -1,0 +1,29 @@
+{
+  "today": {
+    "steps": 7580,
+    "calories": 350,
+    "distance": 5.8,
+    "activeMinutes": 65
+  },
+  "dailySteps": [
+    { "date": "2024-07-20", "steps": 6500 },
+    { "date": "2024-07-21", "steps": 8100 },
+    { "date": "2024-07-22", "steps": 7200 },
+    { "date": "2024-07-23", "steps": 9500 },
+    { "date": "2024-07-24", "steps": 5800 },
+    { "date": "2024-07-25", "steps": 7800 },
+    { "date": "2024-07-26", "steps": 7580 }
+  ],
+  "weeklyTotalSteps": 52480,
+  "leaderboard": [
+    { "rank": 1, "name": "You", "steps": 52480 },
+    { "rank": 2, "name": "Alice W.", "steps": 48900 },
+    { "rank": 3, "name": "Bob J.", "steps": 45100 },
+    { "rank": 4, "name": "Charlie S.", "steps": 42000 },
+    { "rank": 5, "name": "Diana M.", "steps": 39500 }
+  ],
+  "bestStreak": 15,
+  "recordSteps": 18500,
+  "stepsSource": "Phone",
+  "lastSync": "2 minutes ago"
+}
