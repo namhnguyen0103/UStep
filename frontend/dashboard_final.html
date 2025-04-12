@@ -7,7 +7,20 @@
   <link rel="stylesheet" href="dashboard_final.css">
 </head>
 <body>
-  <script src="dashboard.js"></script>
+  <script type="module" src="./js/dashboard.js"></script>
+  <script src="./js/dashboard-friend.js"></script>
+  <!-- Friend Tab Bar Button -->
+  <button id="friend-side-bar-button" >☰</button>
+  <!-- Friend Tab Bar -->
+  <div id="friend-side-bar">
+    <button id="friend-side-bar-close">&times;</button>
+    <h2>Your Friends</h2>
+    <input type="email" id="friend-search-bar" placeholder="Find with umass email"/>
+    <ul id="friend-list">
+
+    </ul>
+
+  </div>
   <div class="container">
     <div class="top-row">
       <div class="top-box">
