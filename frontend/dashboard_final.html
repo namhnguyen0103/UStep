@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fitness Dashboard</title>
   <link rel="stylesheet" href="dashboard_final.css">
 </head>
+
 <body>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="./js/dashboard.js"></script>
   <script src="./js/dashboard-friend.js"></script>
+  <script src="./js/dashboard-view.js"></script>
+
+
   <!-- Friend Tab Bar Button -->
-  <button id="friend-side-bar-button" >☰</button>
+  <button id="friend-side-bar-button">☰</button>
   <!-- Friend Tab Bar -->
   <div id="friend-side-bar">
     <button id="friend-side-bar-close">&times;</button>
     <h2>Your Friends</h2>
-    <input type="email" id="friend-search-bar" placeholder="Find with umass email"/>
+    <input type="email" id="friend-search-bar" placeholder="Find with umass email" />
     <ul id="friend-list">
 
     </ul>
@@ -23,61 +29,184 @@
   </div>
   <div class="container">
     <div class="top-row">
-      <div class="top-box">
+      <div class="top-box" onclick="showDetail('steps')">
         <h3>Total Steps Today</h3>
-        <img src="assets/total-steps.jpeg.webp" alt="Total Steps Today" />
+        <!-- <img src="assets/total-steps.jpeg.webp" alt="Total Steps Today" /> -->
+        <div id="stepsChartPreviewWrapper"></div>
       </div>
-      <div class="top-box">
+      <div class="top-box" onclick="showDetail('calories')">
         <h3>Calories Burned</h3>
         <img src="assets/calories-burned.png" alt="Calories Burned" />
       </div>
-      <div class="top-box">
+      <div class="top-box" onclick="showDetail('distance')">
         <h3>Distance Covered</h3>
         <img src="assets/distance-covered.png" alt="Distance Covered" />
       </div>
-      <div class="top-box">
+      <div class="top-box" onclick="showDetail('minutes')">
         <h3>Active Minutes</h3>
         <img src="assets/active-minutes.png" alt="Active Minutes" />
       </div>
     </div>
+
     <div class="middle-section">
       <div class="left-column">
-        <div class="box">
+        <div class="box" onclick="showDetail('leaderboard')">
           <h3>Leaderboard</h3>
           <img src="assets/leaderboard.png" alt="Leaderboard" />
         </div>
         <div class="box sign-out">
           <h3>Sign Out</h3>
-          <img src="assets/sign-out.png" alt="Sign Out" />
         </div>
       </div>
       <div class="right-column">
-        <div class="box">
+        <div class="box" onclick="showDetail('trend')">
           <h3>Daily Step Trend</h3>
           <img src="assets/daily-step-trend.png" alt="Daily Step Trend" />
         </div>
-        <div class="box">
+        <div class="box" onclick="showDetail('weekly')">
           <h3>Weekly Progress</h3>
           <img src="assets/weekly-progress.png" alt="Weekly Progress" />
         </div>
-        <div class="box">
+        <div class="box" onclick="showDetail('insights')">
           <h3>Activity Insights</h3>
           <img src="assets/activity-insights.png" alt="Activity Insights" />
         </div>
-        <div class="box">
+        <div class="box" onclick="showDetail('source')">
           <h3>Steps by Source</h3>
           <img src="assets/steps-by-source.png" alt="Steps by Source" />
         </div>
-        <div class="box">
+        <div class="box" onclick="showDetail('streaks')">
           <h3>Best Streaks & Records</h3>
           <img src="assets/best-streaks.png" alt="Best Streaks & Records" />
         </div>
-        <div class="box">
+        <div class="box" onclick="showDetail('sync')">
           <h3>Device Sync Status</h3>
           <img src="assets/device-sync.png" alt="Device Sync Status" />
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Detail views -->
+  <div class="detail-view" id="detail-steps">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Total Steps Today</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <canvas id="hourlyStepsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-calories">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Calories Burned</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/calories-burned.png" alt="Calories" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-distance">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Distance Covered</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/distance-covered.png" alt="Distance" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-minutes">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Active Minutes</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/active-minutes.png" alt="Minutes" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-leaderboard">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Leaderboard</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/leaderboard.png" alt="Leaderboard" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-signout">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Sign Out</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/sign-out.png" alt="Sign Out" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-trend">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Daily Step Trend</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/daily-step-trend.png" alt="Trend" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-weekly">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Weekly Progress</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/weekly-progress.png" alt="Weekly Progress" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-insights">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Activity Insights</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/activity-insights.png" alt="Insights" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-source">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Steps by Source</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/steps-by-source.png" alt="Source" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-streaks">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Best Streaks & Records</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/best-streaks.png" alt="Streaks" />
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detail-sync">
+    <button class="close-btn" onclick="closeDetail()">❌</button>
+    <h2>Device Sync Status</h2>
+    <div class="detail-content">
+      <div class="chart-box">
+        <img src="assets/device-sync.png" alt="Sync" />
+      </div>
+    </div>
+  </div>
 </body>
+
 </html>
