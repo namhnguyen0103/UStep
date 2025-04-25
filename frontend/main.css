@@ -176,7 +176,7 @@
 }
 
 @media (max-width: 768px) {
-  #header-wrapper {
+  #header-wrapper, #footer-wrapper {
     padding: 0 1rem;
   }
 }

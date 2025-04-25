@@ -180,4 +180,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       return Promise.reject(`Error during logout DB update: ${error.message}`);
     }
   }
+
+
 });
