@@ -132,20 +132,10 @@ document.addEventListener("DOMContentLoaded", function () {
     submitButton.disabled = true;
     submitButton.textContent = "Creating Account...";
 
-    try {
-      const userDB = new UserDatabase("UStepDB");
-      await userDB.addUser({
-        email,
-        password,
-        firstName,
-        lastName,
-        dateCreated: new Date(),
-        lastLogin: new Date(),
-        isLoggedIn: true,
-      });
-      console.log("User added to IndexedDB successfully.");
+    let backendProfileId = null;
 
-      submitButton.textContent = "Syncing Profile...";
+    try {
+      console.log("Attempting to create profile on backend...");
       const profileData = {
         email: email,
         first_name: firstName,
@@ -160,27 +150,41 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify(profileData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+      const responseData = await response.json();
+
+      if (!response.ok || !responseData.success || !responseData.id) {
         console.error(
           "Backend profile creation failed:",
           response.status,
-          errorData
+          responseData
         );
-
-        // revert IndexedDB changes if backend profile creation fails
-        await userDB.deleteUser(email);
-        console.log(
-          "Reverted IndexedDB changes: user removed from local database"
-        );
-
-        throw new Error(
-          errorData.message ||
-            `Failed to create profile on server (status: ${response.status}). Please try again later.`
-        );
+        const errorMessage =
+          responseData?.message ||
+          `Failed to create profile on server (status: ${response.status}). Please check if the email is already registered or try again later.`;
+        throw new Error(errorMessage);
       }
 
-      console.log("Backend profile created successfully.");
+      backendProfileId = responseData.id;
+      console.log(
+        "Backend profile created successfully. ID:",
+        backendProfileId
+      );
+      submitButton.textContent = "Saving Profile...";
+
+      const userDB = new UserDatabase("UStepDB");
+      const userData = {
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        backendId: backendProfileId,
+        dateCreated: new Date(),
+        lastLogin: new Date(),
+        isLoggedIn: true,
+      };
+
+      await userDB.addUser(userData);
+      console.log("User added to IndexedDB successfully with backend ID.");
 
       localStorage.setItem("currentUser", email);
       showMessage(formMessage, "Account created successfully!", "success");
