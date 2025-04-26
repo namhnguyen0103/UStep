@@ -71,18 +71,8 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const username = document.getElementById("username").value;
     const email = document.getElementById("email").value;
     const password = passwordInput.value;
-
-    if (username.length < 3) {
-      showMessage(
-        formMessage,
-        "Username must be at least 3 characters long",
-        "error"
-      );
-      return;
-    }
 
     // umass email only
     const umassEmailRegex = /^[^\s@]+@umass\.edu$/i;
@@ -124,7 +114,6 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const userDB = new UserDatabase("UStepDB");
       await userDB.addUser({
-        username,
         email,
         password,
         dateCreated: new Date(),

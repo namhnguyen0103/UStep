@@ -29,14 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const userDB = new UserDatabase("UStepDB");
 
-      let userData;
-      if (email.includes("@")) {
-        // input is an email
-        userData = await userDB.getUserByEmail(email);
-      } else {
-        // input is a username
-        userData = await userDB.getUserByUsername(email);
-      }
+      const userData = await userDB.getUserByEmail(email);
 
       if (!userData) {
         showMessage(

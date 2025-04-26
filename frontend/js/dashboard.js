@@ -117,20 +117,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  const usernameDisplay = document.getElementById("username-display");
-  if (usernameDisplay) {
+  const userEmailDisplay = document.getElementById("user-email-display");
+  if (userEmailDisplay) {
     try {
       const userDB = new UserDatabase("UStepDB");
       const userData = await userDB.getUserByEmail(currentUserEmail);
-      if (userData && userData.username) {
-        usernameDisplay.textContent = userData.username;
+      if (userData && userData.email) {
+        userEmailDisplay.textContent = userData.email;
       } else {
         // null case
-        usernameDisplay.textContent = "User";
+        userEmailDisplay.textContent = "User";
       }
     } catch (err) {
-      console.error("Failed to get username:", err);
-      usernameDisplay.textContent = "User";
+      console.error("Failed to get user email:", err);
+      userEmailDisplay.textContent = "User";
     }
   }
 

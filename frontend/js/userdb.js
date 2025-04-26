@@ -14,9 +14,16 @@ export class UserDatabase {
 
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
+        const transaction = event.target.transaction;
+        let store;
         if (!db.objectStoreNames.contains("users")) {
-          const store = db.createObjectStore("users", { keyPath: "email" });
-          store.createIndex("username", "username", { unique: true });
+          store = db.createObjectStore("users", { keyPath: "email" });
+        } else {
+          store = transaction.objectStore("users");
+        }
+
+        if (store.indexNames.contains("username")) {
+          store.deleteIndex("username");
         }
       };
 
@@ -34,13 +41,6 @@ export class UserDatabase {
     const existingUserByEmail = await this.getUserByEmail(userData.email);
     if (existingUserByEmail) {
       throw new Error("A user with this email already exists");
-    }
-
-    const existingUserByUsername = await this.getUserByUsername(
-      userData.username
-    );
-    if (existingUserByUsername) {
-      throw new Error("A user with this username already exists");
     }
 
     const db = await this.openDatabase();
@@ -68,28 +68,6 @@ export class UserDatabase {
     const tx = db.transaction("users", "readonly");
     const store = tx.objectStore("users");
     const request = store.get(email);
-
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => {
-        resolve(request.result);
-      };
-
-      request.onerror = (event) => {
-        reject(new Error(`Failed to retrieve user: ${event.target.error}`));
-      };
-
-      tx.oncomplete = () => {
-        db.close();
-      };
-    });
-  }
-
-  async getUserByUsername(username) {
-    const db = await this.openDatabase();
-    const tx = db.transaction("users", "readonly");
-    const store = tx.objectStore("users");
-    const index = store.index("username");
-    const request = index.get(username);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = () => {

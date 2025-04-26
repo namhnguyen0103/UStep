@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (accountLink) {
       const accountText = accountLink.querySelector("p");
       if (accountText) {
-        accountText.textContent = `${userData.username}'s Account`;
+        accountText.textContent = `${userData.email}'s Account`;
       }
       accountLink.href = "dashboard_final.html";
     }
