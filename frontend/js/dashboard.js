@@ -12,6 +12,8 @@ function getTodayDateString() {
 async function loadTodaysStepData(backendId) {
   if (!backendId) {
     console.error("Cannot fetch today's steps without a backendId.");
+    const editBtn = document.getElementById("edit-steps-button");
+    if (editBtn) editBtn.disabled = true;
     return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
   }
 
@@ -32,7 +34,8 @@ async function loadTodaysStepData(backendId) {
         const errorData = await response.json();
         console.error("API error details:", errorData);
       } catch (parseError) {}
-      // return default values
+      const editBtn = document.getElementById("edit-steps-button");
+      if (editBtn) editBtn.disabled = true;
       return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
     }
 
@@ -41,6 +44,8 @@ async function loadTodaysStepData(backendId) {
 
     if (!Array.isArray(stepEntries)) {
       console.error("API response for steps is not an array:", stepEntries);
+      const editBtn = document.getElementById("edit-steps-button");
+      if (editBtn) editBtn.disabled = true;
       return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
     }
 
@@ -50,6 +55,8 @@ async function loadTodaysStepData(backendId) {
 
     if (todayEntry && typeof todayEntry.steps === "number") {
       console.log("Found today's step entry:", todayEntry);
+      const editBtn = document.getElementById("edit-steps-button");
+      if (editBtn) editBtn.disabled = false;
 
       return {
         steps: todayEntry.steps,
@@ -59,11 +66,91 @@ async function loadTodaysStepData(backendId) {
       };
     } else {
       console.log("No step entry found for today:", todayDateString);
+      const editBtn = document.getElementById("edit-steps-button");
+      if (editBtn) editBtn.disabled = false;
       return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
     }
   } catch (error) {
     console.error("Network or other error fetching today's step data:", error);
+    const editBtn = document.getElementById("edit-steps-button");
+    if (editBtn) editBtn.disabled = true;
     return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
+  }
+}
+
+async function saveTodaysSteps(backendId, newSteps) {
+  if (!backendId) {
+    console.error("Cannot save steps without backendId.");
+    return { success: false, message: "User ID missing." };
+  }
+  if (
+    newSteps === null ||
+    newSteps === undefined ||
+    isNaN(newSteps) ||
+    newSteps < 0
+  ) {
+    console.error("Invalid step count provided:", newSteps);
+    return {
+      success: false,
+      message: "Invalid step count. Must be 0 or greater.",
+    };
+  }
+
+  const todayDateString = getTodayDateString();
+  const apiUrl = `${BACKEND_URL}/api/profiles/${backendId}/steps`;
+  const stepsPayload = {
+    date: todayDateString,
+    steps: Math.round(newSteps),
+  };
+
+  console.log(`Saving steps to: ${apiUrl}`, stepsPayload);
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(stepsPayload),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      console.error(
+        `API error saving steps: ${response.status} ${response.statusText}`,
+        responseData
+      );
+      const message =
+        responseData?.message ||
+        `Server error (${response.status}). Could not save steps.`;
+      return { success: false, message: message };
+    }
+
+    if (
+      responseData.success === true ||
+      response.status === 200 ||
+      response.status === 201
+    ) {
+      console.log("Steps saved successfully via API:", responseData);
+      return {
+        success: true,
+        message: "Steps saved!",
+        savedSteps: stepsPayload.steps,
+      };
+    } else {
+      console.warn(
+        "API response OK, but potentially unsuccessful:",
+        responseData
+      );
+      return {
+        success: false,
+        message: responseData?.message || "Could not confirm save.",
+      };
+    }
+  } catch (error) {
+    console.error("Network or other error saving step data:", error);
+    return { success: false, message: "Network error. Could not save steps." };
   }
 }
 
@@ -104,6 +191,15 @@ function displayDashboardData(todaysMetrics, staticData) {
   updateMetric("calories-burned", safeMetrics.calories, "kcal");
   updateMetric("distance-covered", safeMetrics.distance, "km");
   updateMetric("active-minutes", safeMetrics.activeMinutes, "mins");
+
+  const editBtn = document.getElementById("edit-steps-button");
+  const canEdit = todaysMetrics !== null;
+  if (editBtn) {
+    editBtn.disabled = !canEdit;
+    if (!canEdit) {
+      console.log("Disabling edit button because initial step load failed.");
+    }
+  }
 
   if (staticData) {
     const leaderboardBody = document.getElementById("leaderboard-body");
@@ -204,7 +300,9 @@ function displayErrorState(message = "Could not load dashboard data.") {
   updateMetric("distance-covered", "Error", "");
   updateMetric("active-minutes", "Error", "");
 
-  // reset other sections
+  const editBtn = document.getElementById("edit-steps-button");
+  if (editBtn) editBtn.disabled = true;
+
   const leaderboardBody = document.getElementById("leaderboard-body");
   if (leaderboardBody) {
     leaderboardBody.innerHTML = `<tr><td colspan="3">${message}</td></tr>`;
@@ -229,6 +327,83 @@ function displayErrorState(message = "Could not load dashboard data.") {
 document.addEventListener("DOMContentLoaded", async function () {
   console.log("DOM fully loaded.");
 
+  let backendId = null;
+  let currentTodaysSteps = 0;
+
+  const displayContainer = document.getElementById("display-steps-container");
+  const editContainer = document.getElementById("edit-steps-container");
+  const editStepsButton = document.getElementById("edit-steps-button");
+  const saveStepsButton = document.getElementById("save-steps-button");
+  const cancelStepsButton = document.getElementById("cancel-steps-button");
+  const editStepsInput = document.getElementById("edit-steps-input");
+  const editStepsMessage = document.getElementById("edit-steps-message");
+
+  function showEditMode() {
+    editStepsInput.value = currentTodaysSteps;
+    displayContainer.style.display = "none";
+    editContainer.style.display = "block";
+    editStepsMessage.textContent = "";
+    saveStepsButton.disabled = false;
+    cancelStepsButton.disabled = false;
+    editStepsInput.focus();
+  }
+
+  function showDisplayMode(steps) {
+    updateMetric("total-steps-today", steps, "steps");
+    updateMetric("daily-step-trend", steps, "steps today");
+
+    editContainer.style.display = "none";
+    displayContainer.style.display = "block";
+    editStepsMessage.textContent = "";
+  }
+
+  if (editStepsButton) {
+    editStepsButton.addEventListener("click", () => {
+      console.log("Edit button clicked. Current steps:", currentTodaysSteps);
+      showEditMode();
+    });
+  }
+
+  if (cancelStepsButton) {
+    cancelStepsButton.addEventListener("click", () => {
+      console.log("Cancel button clicked.");
+      showDisplayMode(currentTodaysSteps);
+    });
+  }
+
+  if (saveStepsButton) {
+    saveStepsButton.addEventListener("click", async () => {
+      const newStepsValue = editStepsInput.value.trim();
+      const newSteps = parseInt(newStepsValue, 10);
+
+      console.log("Save button clicked. Input value:", newStepsValue);
+
+      if (isNaN(newSteps) || newSteps < 0 || newStepsValue === "") {
+        editStepsMessage.textContent =
+          "Please enter a valid number (0 or greater).";
+        return;
+      }
+
+      saveStepsButton.disabled = true;
+      cancelStepsButton.disabled = true;
+      editStepsMessage.textContent = "Saving...";
+
+      const result = await saveTodaysSteps(backendId, newSteps);
+
+      if (result.success) {
+        currentTodaysSteps = result.savedSteps;
+        editStepsMessage.textContent = "Saved!";
+        setTimeout(() => {
+          showDisplayMode(currentTodaysSteps);
+        }, 1000);
+      } else {
+        editStepsMessage.textContent = `Error: ${result.message}`;
+        saveStepsButton.disabled = false;
+        cancelStepsButton.disabled = false;
+      }
+    });
+  }
+
   const currentUserEmail = localStorage.getItem("currentUser");
   if (!currentUserEmail) {
     console.log("No current user found, redirecting to loginPage.html.");
@@ -237,7 +412,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   const userEmailDisplay = document.getElementById("user-email-display");
-  let backendId = null;
 
   try {
     const userDB = new UserDatabase("UStepDB");
@@ -255,6 +429,14 @@ document.addEventListener("DOMContentLoaded", async function () {
           loadTodaysStepData(backendId),
           loadStaticDashboardData(),
         ]);
+
+        if (todaysMetrics) {
+          currentTodaysSteps = todaysMetrics.steps;
+        } else {
+          currentTodaysSteps = 0;
+          if (editStepsButton) editStepsButton.disabled = true;
+          console.warn("Initial load for today's metrics failed.");
+        }
 
         if (staticData === null) {
           console.warn(
