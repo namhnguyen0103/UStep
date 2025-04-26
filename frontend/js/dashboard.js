@@ -425,6 +425,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         backendId = userData.backendId;
         console.log("User Backend ID found:", backendId);
 
+        document.body.dataset.userId = backendId;
+
         const [todaysMetrics, staticData] = await Promise.all([
           loadTodaysStepData(backendId),
           loadStaticDashboardData(),
@@ -452,6 +454,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           "Backend ID not found for logged-in user:",
           currentUserEmail
         );
+        delete document.body.dataset.userId;
         if (userEmailDisplay) userEmailDisplay.textContent = userData.email;
         displayErrorState(
           "User profile data is incomplete. Cannot load dashboard."
@@ -462,6 +465,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         "User data not found in local DB for email:",
         currentUserEmail
       );
+      delete document.body.dataset.userId;
       if (userEmailDisplay) userEmailDisplay.textContent = "Error";
       localStorage.removeItem("currentUser");
       displayErrorState("Failed to load user data. Please log in again.");
@@ -472,6 +476,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   } catch (err) {
     console.error("Failed to get user data from DB or load dashboard:", err);
+    delete document.body.dataset.userId;
     if (userEmailDisplay) userEmailDisplay.textContent = "Error";
     displayErrorState("An error occurred while loading your dashboard.");
   }

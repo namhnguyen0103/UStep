@@ -12,13 +12,46 @@
     <!-- Friend Tab Bar -->
     <div id="friend-side-bar">
       <button id="friend-side-bar-close">×</button>
-      <h2>Your Friends</h2>
+      <h2>Search Users</h2>
       <input
         type="email"
         id="friend-search-bar"
-        placeholder="Find with umass email"
+        placeholder="Search by name or email"
+        style="
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        "
       />
-      <ul id="friend-list"></ul>
+      <ul
+        id="friend-search-results"
+        style="
+          max-height: 150px;
+          overflow-y: auto;
+          border: 1px solid #eee;
+          margin-bottom: 20px;
+          padding: 0;
+        "
+      >
+        <li
+          id="search-placeholder"
+          style="padding: 8px 10px; color: #888; font-style: italic"
+        >
+          Start typing to search...
+        </li>
+      </ul>
+
+      <h3>Current Friends</h3>
+      <ul
+        id="friend-list"
+        style="max-height: calc(100vh - 250px); overflow-y: auto"
+      >
+        <li id="friend-list-loading" style="padding: 8px 0; color: #888">
+          Loading friends...
+        </li>
+      </ul>
     </div>
 
     <div class="container">
@@ -178,6 +211,6 @@
       </div>
     </div>
     <script type="module" src="./js/dashboard.js"></script>
-    <script src="./js/dashboard-friend.js"></script>
+    <script type="module" src="./js/dashboard-friend.js"></script>
   </body>
 </html>
