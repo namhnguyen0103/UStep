@@ -104,4 +104,25 @@ export class UserDatabase {
       };
     });
   }
+
+  async deleteUser(email) {
+    const db = await this.openDatabase();
+    const tx = db.transaction("users", "readwrite");
+    const store = tx.objectStore("users");
+    const request = store.delete(email);
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        resolve("User deleted successfully!");
+      };
+
+      request.onerror = (event) => {
+        reject(new Error(`Failed to delete user: ${event.target.error}`));
+      };
+
+      tx.oncomplete = () => {
+        db.close();
+      };
+    });
+  }
 }

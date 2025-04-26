@@ -1,8 +1,12 @@
 import { UserDatabase } from "./userdb.js";
 import { showMessage } from "./utils.js";
+import { BACKEND_URL } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("signupForm");
+  const firstNameInput = document.getElementById("firstName");
+  const lastNameInput = document.getElementById("lastName");
+  const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
   const passwordStrength = document.getElementById("passwordStrength");
   const formMessage = document.getElementById("formMessage");
@@ -29,52 +33,70 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updatePasswordStrengthUI(strength) {
+    passwordStrength.className = "password-strength"; // reset classes
     switch (strength) {
       case 0:
       case 1:
         passwordStrength.textContent = "Weak password";
-        passwordStrength.className = "password-strength weak";
+        passwordStrength.classList.add("weak");
         break;
       case 2:
       case 3:
         passwordStrength.textContent = "Medium password";
-        passwordStrength.className = "password-strength medium";
+        passwordStrength.classList.add("medium");
         break;
       case 4:
       case 5:
         passwordStrength.textContent = "Strong password";
-        passwordStrength.className = "password-strength strong";
+        passwordStrength.classList.add("strong");
         break;
+      default:
+        passwordStrength.textContent = "";
     }
   }
 
   passwordInput.addEventListener("input", function () {
     const password = passwordInput.value;
 
-    if (password.length < 8) {
-      showMessage(
-        formMessage,
-        "Password must be at least 8 characters long",
-        "error"
-      );
-      return;
+    if (password.length > 0) {
+      const strength = calculatePasswordStrength(password);
+      updatePasswordStrengthUI(strength);
+      if (password.length < 8) {
+        showMessage(
+          formMessage,
+          "Password must be at least 8 characters long",
+          "error"
+        );
+      } else {
+        if (formMessage.textContent.includes("8 characters")) {
+          formMessage.style.display = "none";
+        }
+      }
+    } else {
+      updatePasswordStrengthUI(0);
+      formMessage.style.display = "none";
     }
-
-    // clear any previous error messages
-    formMessage.style.display = "none";
-
-    const strength = calculatePasswordStrength(password);
-    updatePasswordStrengthUI(strength);
   });
 
   // form submission
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
+    formMessage.style.display = "none";
 
-    const email = document.getElementById("email").value;
+    const firstName = firstNameInput.value.trim();
+    const lastName = lastNameInput.value.trim();
+    const email = emailInput.value.trim();
     const password = passwordInput.value;
 
-    // umass email only
+    if (!firstName || !lastName) {
+      showMessage(
+        formMessage,
+        "Please enter both first and last name",
+        "error"
+      );
+      return;
+    }
+
     const umassEmailRegex = /^[^\s@]+@umass\.edu$/i;
     if (!umassEmailRegex.test(email)) {
       showMessage(
@@ -95,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const strength = calculatePasswordStrength(password);
-
     // must be medium or stronger
     if (strength < 2) {
       showMessage(
@@ -116,16 +137,54 @@ document.addEventListener("DOMContentLoaded", function () {
       await userDB.addUser({
         email,
         password,
+        firstName,
+        lastName,
         dateCreated: new Date(),
         lastLogin: new Date(),
         isLoggedIn: true,
       });
+      console.log("User added to IndexedDB successfully.");
 
-      showMessage(formMessage, "Account created successfully!", "success");
+      submitButton.textContent = "Syncing Profile...";
+      const profileData = {
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+      };
 
-      submitButton.textContent = "Account Created";
+      const response = await fetch(`${BACKEND_URL}/api/profiles`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(
+          "Backend profile creation failed:",
+          response.status,
+          errorData
+        );
+
+        // revert IndexedDB changes if backend profile creation fails
+        await userDB.deleteUser(email);
+        console.log(
+          "Reverted IndexedDB changes: user removed from local database"
+        );
+
+        throw new Error(
+          errorData.message ||
+            `Failed to create profile on server (status: ${response.status}). Please try again later.`
+        );
+      }
+
+      console.log("Backend profile created successfully.");
 
       localStorage.setItem("currentUser", email);
+      showMessage(formMessage, "Account created successfully!", "success");
+      submitButton.textContent = "Account Created!";
 
       setTimeout(() => {
         window.location.href = "dashboard_final.html";
