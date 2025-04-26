@@ -1,0 +1,10 @@
+services:
+  ustep-backend:
+    build: .
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - '5806:4000'
+    env_file:
+      - .env
+    restart: always
