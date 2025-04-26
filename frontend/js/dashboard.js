@@ -341,6 +341,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   function showEditMode() {
     editStepsInput.value = currentTodaysSteps;
     displayContainer.style.display = "none";
+    editStepsButton.style.display = "none";
     editContainer.style.display = "block";
     editStepsMessage.textContent = "";
     saveStepsButton.disabled = false;
@@ -354,6 +355,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     editContainer.style.display = "none";
     displayContainer.style.display = "block";
+    editStepsButton.style.display = "block";
     editStepsMessage.textContent = "";
   }
 
