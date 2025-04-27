@@ -5,6 +5,7 @@ let friendships = []; // { id, userId, friendId, created_at }
 let metrics = []; // { id, userId, metricType, value, recordedAt }
 let steps = []; // { id, userId, date, steps, createdAt }
 let devices = []; // { id, userId, deviceName, deviceType, createdAt }
+let calories = []; // { id, userId, date, calories, createdAt }
 
 const findProfileById = (id) => profiles.find((p) => p.id === id);
 const findProfileByEmail = (email) => profiles.find((p) => p.email === email);
@@ -218,6 +219,64 @@ export const removeStepById = (id) => {
     return true;
   }
   return false;
+};
+
+// Find all calories by user and date range
+export const findCaloriesByUserAndDateRange = (userId, start, end) => {
+  let userCalories = calories.filter((s) => s.userId === userId);
+
+  if (start) {
+    userCalories = userCalories.filter((s) => s.date >= start);
+  }
+  if (end) {
+    userCalories = userCalories.filter((s) => s.date <= end);
+  }
+
+  // sort by date descending
+  userCalories.sort((a, b) => b.date.localeCompare(a.date));
+
+  return deepCopy(userCalories);
+};
+
+// Find calorie by ID
+export const findCalorieById = (id) => {
+  const calorie = calories.find((s) => s.id === id);
+  return calorie ? deepCopy(calorie) : null;
+};
+
+// Remove calorie by ID
+export const removeCalorieById = (id) => {
+  const index = calories.findIndex((s) => s.id === id);
+  if (index > -1) {
+    calories.splice(index, 1);
+    return true;
+  }
+  return false;
+};
+
+// Create new calorie
+export const upsertCalories = (userId, calorieData) => {
+  const existingIndex = calories.findIndex(
+    (s) => s.userId === userId && s.date === calorieData.date
+  );
+
+  if (existingIndex > -1) {
+    calories[existingIndex] = {
+      ...calories[existingIndex],
+      calories: calorieData.calories,
+      updatedAt: new Date(),
+    };
+    return deepCopy(calories[existingIndex]);
+  } else {
+    const newCalorieRecord = {
+      id: randomUUID(),
+      userId,
+      ...calorieData,
+      createdAt: new Date(),
+    };
+    calories.push(newCalorieRecord);
+    return deepCopy(newCalorieRecord);
+  }
 };
 
 // Add a new device
