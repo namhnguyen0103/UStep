@@ -68,4 +68,30 @@ router.delete("/:id", (req, res, next) => {
   }
 });
 
+router.put(
+  "/:id",
+  validate(createMetricValidation),
+  (req, res, next) => {
+    try {
+      const { userId, id } = req.params;
+      if (!store.profileExistsById(userId)) {
+        return res.status(404).json({ success: false, message: "User profile not found" });
+      }
+      const updated = store.updateMetricById(id, {
+        metricType: req.body.metricType,
+        value: req.body.value
+      });
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "Metric not found" });
+      }
+      res.status(200).json(updated);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+
 export default router;
+

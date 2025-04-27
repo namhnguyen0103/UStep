@@ -221,32 +221,63 @@ export const removeStepById = (id) => {
   return false;
 };
 
-// Find all calories by user and date range
+// Update helpers
+export const updateFriendshipById = (id, updateData) => {
+  const index = friendships.findIndex((f) => f.id === id);
+  if (index === -1) return null;
+  friendships[index] = {
+    ...friendships[index],
+    ...updateData,
+    updated_at: new Date(),
+  };
+  return deepCopy(friendships[index]);
+};
+
+export const updateMetricById = (id, updateData) => {
+  const index = metrics.findIndex((m) => m.id === id);
+  if (index === -1) return null;
+  metrics[index] = {
+    ...metrics[index],
+    ...updateData,
+    updatedAt: new Date(),
+  };
+  return deepCopy(metrics[index]);
+};
+
+export const updateStepById = (id, updateData) => {
+  const index = steps.findIndex((s) => s.id === id);
+  if (index === -1) return null;
+  steps[index] = {
+    ...steps[index],
+    ...updateData,
+    updatedAt: new Date(),
+  };
+  return deepCopy(steps[index]);
+};
+
+export const removeProfileById = (id) => {
+  const index = profiles.findIndex((p) => p.id === id);
+  if (index === -1) return false;
+  profiles.splice(index, 1);
+  return true;
+};
+
+// Calories endpoints
 export const findCaloriesByUserAndDateRange = (userId, start, end) => {
-  let userCalories = calories.filter((s) => s.userId === userId);
-
-  if (start) {
-    userCalories = userCalories.filter((s) => s.date >= start);
-  }
-  if (end) {
-    userCalories = userCalories.filter((s) => s.date <= end);
-  }
-
-  // sort by date descending
+  let userCalories = calories.filter((c) => c.userId === userId);
+  if (start) userCalories = userCalories.filter((c) => c.date >= start);
+  if (end)   userCalories = userCalories.filter((c) => c.date <= end);
   userCalories.sort((a, b) => b.date.localeCompare(a.date));
-
   return deepCopy(userCalories);
 };
 
-// Find calorie by ID
 export const findCalorieById = (id) => {
-  const calorie = calories.find((s) => s.id === id);
+  const calorie = calories.find((c) => c.id === id);
   return calorie ? deepCopy(calorie) : null;
 };
 
-// Remove calorie by ID
 export const removeCalorieById = (id) => {
-  const index = calories.findIndex((s) => s.id === id);
+  const index = calories.findIndex((c) => c.id === id);
   if (index > -1) {
     calories.splice(index, 1);
     return true;
@@ -254,12 +285,10 @@ export const removeCalorieById = (id) => {
   return false;
 };
 
-// Create new calorie
 export const upsertCalories = (userId, calorieData) => {
   const existingIndex = calories.findIndex(
-    (s) => s.userId === userId && s.date === calorieData.date
+    (c) => c.userId === userId && c.date === calorieData.date
   );
-
   if (existingIndex > -1) {
     calories[existingIndex] = {
       ...calories[existingIndex],
@@ -268,18 +297,18 @@ export const upsertCalories = (userId, calorieData) => {
     };
     return deepCopy(calories[existingIndex]);
   } else {
-    const newCalorieRecord = {
+    const newRecord = {
       id: randomUUID(),
       userId,
       ...calorieData,
       createdAt: new Date(),
     };
-    calories.push(newCalorieRecord);
-    return deepCopy(newCalorieRecord);
+    calories.push(newRecord);
+    return deepCopy(newRecord);
   }
 };
 
-// Add a new device
+// Device endpoints
 export const addDevice = (userId, deviceData) => {
   const newDevice = {
     id: randomUUID(),
@@ -291,18 +320,14 @@ export const addDevice = (userId, deviceData) => {
   return deepCopy(newDevice);
 };
 
-// Find all devices for a specific user
-export const findDevicesByUserId = (userId) => {
-  return deepCopy(devices.filter((d) => d.userId === userId));
-};
+export const findDevicesByUserId = (userId) =>
+  deepCopy(devices.filter((d) => d.userId === userId));
 
-// Find a specific device by its ID
 export const findDeviceById = (id) => {
   const device = devices.find((d) => d.id === id);
   return device ? deepCopy(device) : null;
 };
 
-// Remove a device by its ID
 export const removeDeviceById = (id) => {
   const index = devices.findIndex((d) => d.id === id);
   if (index > -1) {
@@ -311,3 +336,5 @@ export const removeDeviceById = (id) => {
   }
   return false;
 };
+
+

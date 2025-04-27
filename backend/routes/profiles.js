@@ -76,4 +76,48 @@ router.get("/:id", validate(profileIdParamValidation), (req, res, next) => {
   }
 });
 
+router.put(
+  "/:id",
+  validate(profileIdParamValidation),
+  validate(createProfileValidation),
+  (req, res, next) => {
+    try {
+      if (!store.profileExistsById(req.params.id)) {
+        return res.status(404).json({ success: false, message: "Profile not found" });
+      }
+      const updated = store.updateProfile(req.params.id, {
+        email: req.body.email,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name
+      });
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "Profile not found" });
+      }
+      res.status(200).json({ success: true, data: updated });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.delete(
+  "/:id",
+  validate(profileIdParamValidation),
+  (req, res, next) => {
+    try {
+      const deleted = store.removeProfileById(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ success: false, message: "Profile not found" });
+      }
+      res.status(200).json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
+
 export default router;
+
+

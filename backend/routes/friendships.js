@@ -74,4 +74,34 @@ router.delete(
   }
 );
 
+router.put(
+  "/:id",
+  validate(friendshipIdParamValidation),
+  validate(createFriendshipValidation),
+  (req, res, next) => {
+    try {
+      if (
+        !store.profileExistsById(req.body.userId) ||
+        !store.profileExistsById(req.body.friendId)
+      ) {
+        return res.status(404).json({ success: false, message: "One or both users not found" });
+      }
+
+      const updated = store.updateFriendshipById(req.params.id, {
+        userId: req.body.userId,
+        friendId: req.body.friendId,
+      });
+
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "Friendship record not found" });
+      }
+
+      res.status(200).json({ success: true, data: updated });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
 export default router;
