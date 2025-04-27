@@ -4,6 +4,7 @@ let profiles = []; // { id, first_name, last_name, email, created_at, updated_at
 let friendships = []; // { id, userId, friendId, created_at }
 let metrics = []; // { id, userId, metricType, value, recordedAt }
 let steps = []; // { id, userId, date, steps, createdAt }
+let devices = []; // { id, userId, deviceName, deviceType, createdAt }
 
 const findProfileById = (id) => profiles.find((p) => p.id === id);
 const findProfileByEmail = (email) => profiles.find((p) => p.email === email);
@@ -214,6 +215,39 @@ export const removeStepById = (id) => {
   const index = steps.findIndex((s) => s.id === id);
   if (index > -1) {
     steps.splice(index, 1);
+    return true;
+  }
+  return false;
+};
+
+// Add a new device
+export const addDevice = (userId, deviceData) => {
+  const newDevice = {
+    id: randomUUID(),
+    userId,
+    ...deviceData,
+    createdAt: new Date(),
+  };
+  devices.push(newDevice);
+  return deepCopy(newDevice);
+};
+
+// Find all devices for a specific user
+export const findDevicesByUserId = (userId) => {
+  return deepCopy(devices.filter((d) => d.userId === userId));
+};
+
+// Find a specific device by its ID
+export const findDeviceById = (id) => {
+  const device = devices.find((d) => d.id === id);
+  return device ? deepCopy(device) : null;
+};
+
+// Remove a device by its ID
+export const removeDeviceById = (id) => {
+  const index = devices.findIndex((d) => d.id === id);
+  if (index > -1) {
+    devices.splice(index, 1);
     return true;
   }
   return false;
