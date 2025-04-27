@@ -6,7 +6,7 @@ import pinoHttp from "pino-http";
 
 dotenv.config();
 
-import mainRouter, { metricRoutes, stepRoutes } from "./routes/index.js";
+import mainRouter, { metricRoutes, stepRoutes, calorieRoutes } from "./routes/index.js";
 import { errorHandler } from "./utils/helpers.js";
 
 const app = express();
@@ -40,6 +40,7 @@ app.use("/api", mainRouter);
 
 app.use("/api/profiles/:userId/metrics", metricRoutes);
 app.use("/api/profiles/:userId/steps", stepRoutes);
+app.use("/api/profiles/:userId/calories", calorieRoutes);
 
 app.use(errorHandler);
 
