@@ -68,8 +68,6 @@ router.delete("/:id", (req, res, next) => {
   }
 });
 
-export default router;
-
 router.put(
   "/:id",
   validate(createMetricValidation),
@@ -92,4 +90,8 @@ router.put(
     }
   }
 );
+
+
+
+export default router;
 
