@@ -218,3 +218,45 @@ export const removeStepById = (id) => {
   }
   return false;
 };
+
+export const updateFriendshipById = (id, updateData) => {
+  const index = friendships.findIndex((f) => f.id === id);
+  if (index === -1) return null;
+  friendships[index] = {
+    ...friendships[index],
+    ...updateData,
+    updated_at: new Date(),
+  };
+  return deepCopy(friendships[index]);
+};
+
+export const updateMetricById = (id, updateData) => {
+  const index = metrics.findIndex(m => m.id === id);
+  if (index === -1) return null;
+  metrics[index] = {
+    ...metrics[index],
+    ...updateData,
+    updatedAt: new Date()
+  };
+  return deepCopy(metrics[index]);
+};
+
+export const updateStepById = (id, updateData) => {
+  const index = steps.findIndex(s => s.id === id);
+  if (index === -1) return null;
+  steps[index] = {
+    ...steps[index],
+    ...updateData,
+    updatedAt: new Date()
+  };
+  return deepCopy(steps[index]);
+};
+
+export const removeProfileById = (id) => {
+  const index = profiles.findIndex(p => p.id === id);
+  if (index === -1) return false;
+  profiles.splice(index, 1);
+  return true;
+};
+
+

@@ -88,4 +88,35 @@ router.delete("/:stepId", (req, res, next) => {
   }
 });
 
+router.put(
+  "/:stepId",
+  validate(createStepValidation),
+  (req, res, next) => {
+    try {
+      const { userId, stepId } = req.params;
+      if (!store.profileExistsById(userId)) {
+        return res.status(404).json({ success: false, message: "User profile not found" });
+      }
+      const existing = store.findStepById(stepId);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: "Step record not found" });
+      }
+      if (existing.userId !== userId) {
+        return res.status(403).json({ success: false, message: "Not authorized to update this step record" });
+      }
+      const updated = store.updateStepById(stepId, {
+        date: req.body.date,
+        steps: req.body.steps
+      });
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "Step record not found" });
+      }
+      res.status(200).json(updated);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
 export default router;
