@@ -3,6 +3,7 @@ import profileRoutes from "./profiles.js";
 import friendshipRoutes from "./friendships.js";
 import metricRoutes from "./metrics.js";
 import stepRoutes from "./steps.js";
+import deviceRoutes from "./devices.js";
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ router.use("/profiles", profileRoutes);
 router.use("/friendships", friendshipRoutes);
 router.use("/metrics", metricRoutes);
 router.use("/steps", stepRoutes);
+router.use("/devices", deviceRoutes);
 
 export default router;
-export { metricRoutes, stepRoutes };
+export { metricRoutes, stepRoutes, deviceRoutes };
