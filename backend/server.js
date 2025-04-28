@@ -6,7 +6,7 @@ import pinoHttp from "pino-http";
 
 dotenv.config();
 
-import mainRouter, { metricRoutes, stepRoutes, calorieRoutes } from "./routes/index.js";
+import mainRouter, { metricRoutes, stepRoutes, calorieRoutes, deviceRoutes } from "./routes/index.js";
 import { errorHandler } from "./utils/helpers.js";
 
 const app = express();
@@ -25,9 +25,9 @@ const logger = pinoHttp({
   transport:
     process.env.NODE_ENV !== "production"
       ? {
-          target: "pino-pretty",
-          options: { singleLine: true },
-        }
+        target: "pino-pretty",
+        options: { singleLine: true },
+      }
       : undefined,
   level: process.env.LOG_LEVEL || "info",
 });
@@ -41,6 +41,7 @@ app.use("/api", mainRouter);
 app.use("/api/profiles/:userId/metrics", metricRoutes);
 app.use("/api/profiles/:userId/steps", stepRoutes);
 app.use("/api/profiles/:userId/calories", calorieRoutes);
+app.use('/api/profiles/:userId/devices', deviceRoutes);
 
 app.use(errorHandler);
 
