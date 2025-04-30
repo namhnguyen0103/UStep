@@ -1,19 +1,19 @@
-import { body, param } from "express-validator";
+import { body, param } from 'express-validator';
 
 export const createRequestValidation = [
-  body("addresseeId")
+  body('addresseeId')
     .isUUID()
-    .withMessage("Valid addresseeId (UUID) is required"),
+    .withMessage('Valid addresseeId (UUID) is required'),
 ];
 
 export const userIdParamValidation = [
-  param("userId")
+  param('userId')
     .isUUID()
-    .withMessage("Valid Profile ID (UUID) is required in URL"),
+    .withMessage('Valid Profile ID (UUID) is required in URL'),
 ];
 
 export const requestIdParamValidation = [
-  param("requestId")
+  param('requestId')
     .isUUID()
-    .withMessage("Valid Friend Request ID (UUID) is required in URL"),
+    .withMessage('Valid Friend Request ID (UUID) is required in URL'),
 ];

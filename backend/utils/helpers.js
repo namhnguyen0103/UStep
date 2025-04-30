@@ -1,10 +1,10 @@
-import { validationResult } from "express-validator";
+import { validationResult } from 'express-validator';
 
 export const errorHandler = (err, req, res, next) => {
-  console.error("ERROR:", err.stack || err);
+  console.error('ERROR:', err.stack || err);
 
   const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  const message = err.message || 'Internal Server Error';
 
   res.status(statusCode).json({
     success: false,
