@@ -1,27 +1,27 @@
-import express from "express";
-import * as store from "../data/store.js";
-import { validate } from "../utils/helpers.js";
+import express from 'express';
+import * as store from '../data/store.js';
+import { validate } from '../utils/helpers.js';
 import {
   createStepValidation,
   listStepsValidation,
-} from "../validators/stepsValidators.js";
+} from '../validators/stepsValidators.js';
 
 // needed to allow /profiles/:userId/steps
 const router = express.Router({ mergeParams: true });
 
 // GET /profiles/:userId/steps - this endpoint is used to list daily steps
-router.get("/", validate(listStepsValidation), (req, res, next) => {
+router.get('/', validate(listStepsValidation), async (req, res, next) => {
   try {
     const { userId } = req.params;
     const { start, end } = req.query;
 
-    if (!store.profileExistsById(userId)) {
+    if (!(await store.profileExistsById(userId))) {
       return res
         .status(404)
-        .json({ success: false, message: "User profile not found" });
+        .json({ success: false, message: 'User profile not found' });
     }
 
-    const steps = store.findStepsByUserAndDateRange(userId, start, end);
+    const steps = await store.findStepsByUserAndDateRange(userId, start, end);
     res.status(200).json(steps);
   } catch (err) {
     next(err);
@@ -29,17 +29,17 @@ router.get("/", validate(listStepsValidation), (req, res, next) => {
 });
 
 // POST /profiles/:userId/steps - this endpoint is used to record or update daily steps
-router.post("/", validate(createStepValidation), (req, res, next) => {
+router.post('/', validate(createStepValidation), async (req, res, next) => {
   try {
     const { userId } = req.params;
-    if (!store.profileExistsById(userId)) {
+    if (!(await store.profileExistsById(userId))) {
       return res
         .status(404)
-        .json({ success: false, message: "User profile not found" });
+        .json({ success: false, message: 'User profile not found' });
     }
 
     const { date, steps } = req.body;
-    const record = store.upsertSteps(userId, { date, steps });
+    const record = await store.upsertSteps(userId, { date, steps });
     res.status(201).json(record);
   } catch (err) {
     next(err);
@@ -47,41 +47,41 @@ router.post("/", validate(createStepValidation), (req, res, next) => {
 });
 
 // DELETE /profiles/:userId/steps/:stepId - this endpoint is used to delete a step record
-router.delete("/:stepId", (req, res, next) => {
+router.delete('/:stepId', async (req, res, next) => {
   try {
     const { userId, stepId } = req.params;
 
-    if (!store.profileExistsById(userId)) {
+    if (!(await store.profileExistsById(userId))) {
       return res
         .status(404)
-        .json({ success: false, message: "User profile not found" });
+        .json({ success: false, message: 'User profile not found' });
     }
 
-    const step = store.findStepById(stepId);
+    const step = await store.findStepById(stepId);
 
     if (!step) {
       return res
         .status(404)
-        .json({ success: false, message: "Step record not found" });
+        .json({ success: false, message: 'Step record not found' });
     }
 
     if (step.userId !== userId) {
       return res.status(403).json({
         success: false,
-        message: "Not authorized to delete this step record",
+        message: 'Not authorized to delete this step record',
       });
     }
 
-    const deleted = store.removeStepById(stepId);
+    const deleted = await store.removeStepById(stepId);
 
     if (deleted) {
       return res
         .status(200)
-        .json({ success: true, message: "Step record deleted successfully" });
+        .json({ success: true, message: 'Step record deleted successfully' });
     } else {
       return res
         .status(500)
-        .json({ success: false, message: "Failed to delete step record" });
+        .json({ success: false, message: 'Failed to delete step record' });
     }
   } catch (err) {
     next(err);
@@ -89,34 +89,42 @@ router.delete("/:stepId", (req, res, next) => {
 });
 
 router.put(
-  "/:stepId",
+  '/:stepId',
   validate(createStepValidation),
-  (req, res, next) => {
+  async (req, res, next) => {
     try {
       const { userId, stepId } = req.params;
-      if (!store.profileExistsById(userId)) {
-        return res.status(404).json({ success: false, message: "User profile not found" });
+      if (!(await store.profileExistsById(userId))) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'User profile not found' });
       }
-      const existing = store.findStepById(stepId);
+      const existing = await store.findStepById(stepId);
       if (!existing) {
-        return res.status(404).json({ success: false, message: "Step record not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: 'Step record not found' });
       }
       if (existing.userId !== userId) {
-        return res.status(403).json({ success: false, message: "Not authorized to update this step record" });
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to update this step record',
+        });
       }
-      const updated = store.updateStepById(stepId, {
+      const updated = await store.updateStepById(stepId, {
         date: req.body.date,
-        steps: req.body.steps
+        steps: req.body.steps,
       });
       if (!updated) {
-        return res.status(404).json({ success: false, message: "Step record not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: 'Step record not found' });
       }
       res.status(200).json(updated);
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
-
 
 export default router;

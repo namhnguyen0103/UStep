@@ -1,340 +1,326 @@
-import { randomUUID } from "crypto";
+import { Op } from '@sequelize/core';
+import { Profile } from './models/Profile.js';
+import { Friendship } from './models/Friendship.js';
+import { Metric } from './models/Metric.js';
+import { Step } from './models/Step.js';
+import { Device } from './models/Device.js';
+import { Calorie } from './models/Calorie.js';
 
-let profiles = []; // { id, first_name, last_name, email, created_at, updated_at }
-let friendships = []; // { id, userId, friendId, created_at }
-let metrics = []; // { id, userId, metricType, value, recordedAt }
-let steps = []; // { id, userId, date, steps, createdAt }
-let devices = []; // { id, userId, deviceName, deviceType, createdAt }
-let calories = []; // { id, userId, date, calories, createdAt }
-
-const findProfileById = (id) => profiles.find((p) => p.id === id);
-const findProfileByEmail = (email) => profiles.find((p) => p.email === email);
-
-const deepCopy = (obj) => JSON.parse(JSON.stringify(obj));
-
-export const addProfile = (profileData) => {
-  const now = new Date();
-  const newProfile = {
-    ...profileData,
-    created_at: now,
-    updated_at: now,
-  };
-  profiles.push(newProfile);
-  return deepCopy(newProfile);
+export const addProfile = async (profileData) => {
+  const newProfile = await Profile.create(profileData);
+  return newProfile.get({ plain: true });
 };
 
-export const getProfileById = (id) => {
-  const profile = findProfileById(id);
-  return profile ? deepCopy(profile) : null;
+export const getProfileById = async (id) => {
+  const profile = await Profile.findByPk(id, { raw: true });
+  return profile;
 };
 
-export const profileExistsById = (id) => {
-  return !!findProfileById(id);
+export const profileExistsById = async (id) => {
+  const count = await Profile.count({ where: { id } });
+  return count > 0;
 };
 
-export const profileExistsByEmail = (email) => {
-  return !!findProfileByEmail(email);
+export const profileExistsByEmail = async (email) => {
+  const count = await Profile.count({ where: { email } });
+  return count > 0;
 };
 
-export const searchProfiles = (query) => {
+export const searchProfiles = async (query) => {
   const lowerQuery = query.toLowerCase();
-  return deepCopy(
-    profiles
-      .filter(
-        (p) =>
-          p.email.toLowerCase().includes(lowerQuery) ||
-          (p.first_name && p.first_name.toLowerCase().includes(lowerQuery)) ||
-          (p.last_name && p.last_name.toLowerCase().includes(lowerQuery))
-      )
-      .map((p) => ({
-        id: p.id,
-        email: p.email,
-        first_name: p.first_name,
-        last_name: p.last_name,
-      }))
-  );
+
+  const profiles = await Profile.findAll({
+    where: {
+      [Op.or]: [
+        { email: { [Op.like]: `%${lowerQuery}%` } },
+        { first_name: { [Op.like]: `%${lowerQuery}%` } },
+        { last_name: { [Op.like]: `%${lowerQuery}%` } },
+      ],
+    },
+    attributes: ['id', 'email', 'first_name', 'last_name'],
+    raw: true,
+  });
+  return profiles;
 };
 
-export const updateProfile = (id, updateData) => {
-  const index = profiles.findIndex((p) => p.id === id);
-  if (index === -1) return null;
-  profiles[index] = {
-    ...profiles[index],
-    ...updateData,
-    updated_at: new Date(),
-  };
-  return deepCopy(profiles[index]);
-};
-
-export const addFriendship = (friendshipData) => {
-  const exists = friendships.some(
-    (f) =>
-      (f.userId === friendshipData.userId &&
-        f.friendId === friendshipData.friendId) ||
-      (f.userId === friendshipData.friendId &&
-        f.friendId === friendshipData.userId)
-  );
-  if (exists) {
-    console.warn(
-      `Friendship between ${friendshipData.userId} and ${friendshipData.friendId} already exists.`
-    );
+export const updateProfile = async (id, updateData) => {
+  const profile = await Profile.findByPk(id);
+  if (!profile) {
     return null;
   }
 
-  const newFriendship = {
-    id: randomUUID(),
-    ...friendshipData,
-    created_at: new Date(),
-  };
-  friendships.push(newFriendship);
-  return deepCopy(newFriendship);
+  const updatedProfile = await profile.update(updateData);
+  return updatedProfile.get({ plain: true });
 };
 
-export const findFriendsByUserId = (userId) => {
-  const relatedFriendships = friendships.filter(
-    (f) => f.userId === userId || f.friendId === userId
-  );
-
-  return deepCopy(
-    relatedFriendships
-      .map((friendship) => {
-        const friendId =
-          friendship.userId === userId
-            ? friendship.friendId
-            : friendship.userId;
-        const friendProfile = findProfileById(friendId);
-
-        return {
-          friendship: { id: friendship.id },
-          profile: friendProfile,
-        };
-      })
-      .filter((item) => item.profile)
-  );
+export const removeProfileById = async (id) => {
+  const deletedRowCount = await Profile.destroy({ where: { id } });
+  return deletedRowCount > 0;
 };
 
-export const removeFriendshipById = (id) => {
-  const index = friendships.findIndex((f) => f.id === id);
-  if (index > -1) {
-    friendships.splice(index, 1);
-    return true;
+export const addFriendship = async (friendshipData) => {
+  const [friendship, created] = await Friendship.findOrCreate({
+    where: {
+      // order doesnt matter
+      [Op.or]: [
+        { userId: friendshipData.userId, friendId: friendshipData.friendId },
+        { userId: friendshipData.friendId, friendId: friendshipData.userId },
+      ],
+    },
+    defaults: friendshipData,
+  });
+
+  if (!created) {
+    console.warn(
+      `Friendship between ${friendshipData.userId} and ${friendshipData.friendId} already exists or was found.`,
+    );
+
+    return friendship.get({ plain: true });
   }
-  return false;
+
+  return friendship.get({ plain: true });
 };
 
-export const findFriendshipBetweenUsers = (user1Id, user2Id) => {
-  const friendship = friendships.find(
-    (f) =>
-      (f.userId === user1Id && f.friendId === user2Id) ||
-      (f.userId === user2Id && f.friendId === user1Id)
-  );
-  return friendship ? deepCopy(friendship) : null;
+export const findFriendsByUserId = async (userId) => {
+  const friendships = await Friendship.findAll({
+    where: {
+      [Op.or]: [{ userId: userId }, { friendId: userId }],
+    },
+    include: [
+      {
+        model: Profile,
+        as: 'friend', // linked by friendId
+        attributes: ['id', 'email', 'first_name', 'last_name'],
+      },
+      {
+        model: Profile,
+        as: 'user', // linked by userId
+        attributes: ['id', 'email', 'first_name', 'last_name'],
+      },
+    ],
+  });
+
+  return friendships
+    .map((friendship) => {
+      let actualFriendProfileInstance = null;
+
+      // @ts-ignore
+      if (friendship.userId === userId) {
+        // @ts-ignore
+        actualFriendProfileInstance = friendship.friend;
+        // @ts-ignore
+      } else if (friendship.friendId === userId) {
+        // @ts-ignore
+        actualFriendProfileInstance = friendship.user;
+      }
+
+      return {
+        // @ts-ignore
+        friendshipId: friendship.id,
+        profile: actualFriendProfileInstance
+          ? actualFriendProfileInstance.get({ plain: true })
+          : null,
+      };
+    })
+    .filter((f) => f.profile != null);
 };
 
-export const addMetric = (userId, metricData) => {
-  const newMetric = {
-    id: randomUUID(),
+export const removeFriendshipById = async (id) => {
+  const deletedRowCount = await Friendship.destroy({ where: { id } });
+  return deletedRowCount > 0;
+};
+
+export const findFriendshipBetweenUsers = async (user1Id, user2Id) => {
+  const friendship = await Friendship.findOne({
+    where: {
+      [Op.or]: [
+        { userId: user1Id, friendId: user2Id },
+        { userId: user2Id, friendId: user1Id },
+      ],
+    },
+    raw: true,
+  });
+  return friendship;
+};
+
+export const updateFriendshipById = async (id, updateData) => {
+  const friendship = await Friendship.findByPk(id);
+  if (!friendship) {
+    return null;
+  }
+
+  const updatedFriendship = await friendship.update(updateData);
+  return updatedFriendship.get({ plain: true });
+};
+
+export const addMetric = async (userId, metricData) => {
+  const newMetric = await Metric.create({
     userId,
     ...metricData,
-    value: String(metricData.value),
+    value: metricData.value.toString(),
     recordedAt: new Date(),
-  };
-  metrics.push(newMetric);
-  return deepCopy(newMetric);
+  });
+  return newMetric.get({ plain: true });
 };
 
-export const findMetricsByUserId = (
+export const findMetricsByUserId = async (
   userId,
-  { metricType, limit = 20, offset = 0 }
+  { metricType, limit = 20, offset = 0 },
 ) => {
-  let userMetrics = metrics.filter((m) => m.userId === userId);
-
+  const where = { userId };
   if (metricType) {
-    userMetrics = userMetrics.filter((m) => m.metricType === metricType);
+    where.metricType = metricType;
   }
 
-  userMetrics.sort((a, b) => b.recordedAt.getTime() - a.recordedAt.getTime());
-
-  return deepCopy(userMetrics.slice(offset, offset + limit));
+  const metrics = await Metric.findAll({
+    where,
+    order: [['recordedAt', 'DESC']],
+    limit,
+    offset,
+    raw: true,
+  });
+  return metrics;
 };
 
-export const upsertSteps = (userId, stepData) => {
-  const existingIndex = steps.findIndex(
-    (s) => s.userId === userId && s.date === stepData.date
-  );
+export const removeMetricById = async (id) => {
+  const deletedRowCount = await Metric.destroy({ where: { id } });
+  return deletedRowCount > 0;
+};
 
-  if (existingIndex > -1) {
-    steps[existingIndex] = {
-      ...steps[existingIndex],
-      steps: stepData.steps,
-      updatedAt: new Date(),
-    };
-    return deepCopy(steps[existingIndex]);
-  } else {
-    const newStepRecord = {
-      id: randomUUID(),
+export const updateMetricById = async (id, updateData) => {
+  const metric = await Metric.findByPk(id);
+  if (!metric) return null;
+
+  const updatedMetric = await metric.update({
+    ...updateData,
+    value: updateData.value.toString(),
+    recordedAt: new Date(),
+  });
+  return updatedMetric.get({ plain: true });
+};
+
+export const upsertSteps = async (userId, stepData) => {
+  const [stepRecord, created] = await Step.findOrCreate({
+    where: {
+      userId,
+      date: stepData.date,
+    },
+    defaults: {
       userId,
       ...stepData,
-      createdAt: new Date(),
-    };
-    steps.push(newStepRecord);
-    return deepCopy(newStepRecord);
+    },
+  });
+
+  if (!created) {
+    await stepRecord.update({ steps: stepData.steps });
   }
+
+  return stepRecord.get({ plain: true });
 };
 
-export const findStepsByUserAndDateRange = (userId, start, end) => {
-  let userSteps = steps.filter((s) => s.userId === userId);
+export const findStepsByUserAndDateRange = async (userId, start, end) => {
+  const where = { userId };
+  const dateWhere = {};
 
   if (start) {
-    userSteps = userSteps.filter((s) => s.date >= start);
+    dateWhere[Op.gte] = start;
   }
   if (end) {
-    userSteps = userSteps.filter((s) => s.date <= end);
+    dateWhere[Op.lte] = end;
+  }
+  if (Object.keys(dateWhere).length > 0) {
+    where.date = dateWhere;
   }
 
-  // sort by date descending
-  userSteps.sort((a, b) => b.date.localeCompare(a.date));
-
-  return deepCopy(userSteps);
+  const steps = await Step.findAll({
+    where,
+    order: [['date', 'DESC']],
+    raw: true,
+  });
+  return steps;
 };
 
-export const removeMetricById = (id) => {
-  const index = metrics.findIndex((m) => m.id === id);
-  if (index > -1) {
-    metrics.splice(index, 1);
-    return true;
-  }
-  return false;
+export const findStepById = async (id) => {
+  const step = await Step.findByPk(id, { raw: true });
+  return step;
 };
 
-export const findStepById = (id) => {
-  const step = steps.find((s) => s.id === id);
-  return step ? deepCopy(step) : null;
+export const removeStepById = async (id) => {
+  const deletedRowCount = await Step.destroy({ where: { id } });
+  return deletedRowCount > 0;
 };
 
-export const removeStepById = (id) => {
-  const index = steps.findIndex((s) => s.id === id);
-  if (index > -1) {
-    steps.splice(index, 1);
-    return true;
-  }
-  return false;
+export const updateStepById = async (id, updateData) => {
+  const step = await Step.findByPk(id);
+  if (!step) return null;
+
+  const updatedStep = await step.update(updateData);
+  return updatedStep.get({ plain: true });
 };
 
-// Update helpers
-export const updateFriendshipById = (id, updateData) => {
-  const index = friendships.findIndex((f) => f.id === id);
-  if (index === -1) return null;
-  friendships[index] = {
-    ...friendships[index],
-    ...updateData,
-    updated_at: new Date(),
-  };
-  return deepCopy(friendships[index]);
+export const findCaloriesByUserAndDateRange = async (userId, start, end) => {
+  const where = { userId };
+  const dateWhere = {};
+  if (start) dateWhere[Op.gte] = start;
+  if (end) dateWhere[Op.lte] = end;
+  if (Object.keys(dateWhere).length > 0) where.date = dateWhere;
+
+  const calorieRecords = await Calorie.findAll({
+    where,
+    order: [['date', 'DESC']],
+    raw: true,
+  });
+  return calorieRecords;
 };
 
-export const updateMetricById = (id, updateData) => {
-  const index = metrics.findIndex((m) => m.id === id);
-  if (index === -1) return null;
-  metrics[index] = {
-    ...metrics[index],
-    ...updateData,
-    updatedAt: new Date(),
-  };
-  return deepCopy(metrics[index]);
+export const findCalorieById = async (id) => {
+  const calorie = await Calorie.findByPk(id, { raw: true });
+  return calorie;
 };
 
-export const updateStepById = (id, updateData) => {
-  const index = steps.findIndex((s) => s.id === id);
-  if (index === -1) return null;
-  steps[index] = {
-    ...steps[index],
-    ...updateData,
-    updatedAt: new Date(),
-  };
-  return deepCopy(steps[index]);
+export const removeCalorieById = async (id) => {
+  const deletedRowCount = await Calorie.destroy({ where: { id } });
+  return deletedRowCount > 0;
 };
 
-export const removeProfileById = (id) => {
-  const index = profiles.findIndex((p) => p.id === id);
-  if (index === -1) return false;
-  profiles.splice(index, 1);
-  return true;
-};
-
-// Calories endpoints
-export const findCaloriesByUserAndDateRange = (userId, start, end) => {
-  let userCalories = calories.filter((c) => c.userId === userId);
-  if (start) userCalories = userCalories.filter((c) => c.date >= start);
-  if (end)   userCalories = userCalories.filter((c) => c.date <= end);
-  userCalories.sort((a, b) => b.date.localeCompare(a.date));
-  return deepCopy(userCalories);
-};
-
-export const findCalorieById = (id) => {
-  const calorie = calories.find((c) => c.id === id);
-  return calorie ? deepCopy(calorie) : null;
-};
-
-export const removeCalorieById = (id) => {
-  const index = calories.findIndex((c) => c.id === id);
-  if (index > -1) {
-    calories.splice(index, 1);
-    return true;
-  }
-  return false;
-};
-
-export const upsertCalories = (userId, calorieData) => {
-  const existingIndex = calories.findIndex(
-    (c) => c.userId === userId && c.date === calorieData.date
-  );
-  if (existingIndex > -1) {
-    calories[existingIndex] = {
-      ...calories[existingIndex],
-      calories: calorieData.calories,
-      updatedAt: new Date(),
-    };
-    return deepCopy(calories[existingIndex]);
-  } else {
-    const newRecord = {
-      id: randomUUID(),
+export const upsertCalories = async (userId, calorieData) => {
+  const [calorieRecord, created] = await Calorie.findOrCreate({
+    where: {
       userId,
-      ...calorieData,
-      createdAt: new Date(),
-    };
-    calories.push(newRecord);
-    return deepCopy(newRecord);
+      date: calorieData.date,
+    },
+    defaults: { userId, ...calorieData },
+  });
+
+  if (!created) {
+    await calorieRecord.update({ calories: calorieData.calories });
   }
+
+  return calorieRecord.get({ plain: true });
 };
 
-// Device endpoints
-export const addDevice = (userId, deviceData) => {
-  const newDevice = {
-    id: randomUUID(),
+export const addDevice = async (userId, deviceData) => {
+  const newDevice = await Device.create({
     userId,
     ...deviceData,
-    createdAt: new Date(),
-  };
-  devices.push(newDevice);
-  return deepCopy(newDevice);
+  });
+  return newDevice.get({ plain: true });
 };
 
-export const findDevicesByUserId = (userId) =>
-  deepCopy(devices.filter((d) => d.userId === userId));
-
-export const findDeviceById = (id) => {
-  const device = devices.find((d) => d.id === id);
-  return device ? deepCopy(device) : null;
+export const findDevicesByUserId = async (userId) => {
+  const devices = await Device.findAll({
+    where: { userId },
+    raw: true,
+  });
+  return devices;
 };
 
-export const removeDeviceById = (id) => {
-  const index = devices.findIndex((d) => d.id === id);
-  if (index > -1) {
-    devices.splice(index, 1);
-    return true;
-  }
-  return false;
+export const findDeviceById = async (id) => {
+  const device = await Device.findByPk(id, { raw: true });
+  return device;
 };
 
-
+export const removeDeviceById = async (id) => {
+  const deletedRowCount = await Device.destroy({ where: { id } });
+  return deletedRowCount > 0;
+};
