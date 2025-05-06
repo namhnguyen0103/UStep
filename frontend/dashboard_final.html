@@ -107,9 +107,48 @@
         </div>
         <div class="top-box">
           <h3>Calories Burned</h3>
-          <div class="metric-display" id="calories-burned">
-            <div class="metric-value">---</div>
-            <div class="metric-unit">kcal</div>
+          <div id="display-calories-container"> 
+            <div class="metric-display" id="calories-burned">
+              <div class="metric-value">---</div>
+              <div class="metric-unit">kcal</div>
+            </div>
+          </div>
+          <button id="edit-calories-button" class="edit-button">Edit</button>
+          <div
+          id="edit-steps-container"
+          style="
+            display: none;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+          "
+        >
+          <input
+            type="number"
+            id="edit-calories-input"
+            min="0"
+            step="1"
+            style="
+              padding: 8px;
+              width: 60%;
+              margin-bottom: 10px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+            "
+          />
+          <div
+            class="edit-controls"
+            style="display: flex; justify-content: center; gap: 10px"
+          >
+            <button id="save-calories-button" class="save-button">Save</button>
+            <button id="cancel-calories-button" class="cancel-button">
+              Cancel
+            </button>
+          </div>
+          <p
+            id="edit-calories-message"
+            style="font-size: 12px; color: red; margin-top: 5px; height: 15px"
+          ></p>
           </div>
         </div>
         <div class="top-box">
@@ -158,14 +197,10 @@
         </div>
         <div class="right-column">
           <div class="box">
-            <h3>Daily Step Trend</h3>
-            <div class="metric-display" id="daily-step-trend">
-              <div class="metric-value">---</div>
-              <div class="metric-unit">steps today</div>
-            </div>
-            <div class="graph-container" id="daily-trend-graph">
-              <!--TODO: add graph here -->
-              <p style="font-size: 12px; margin-top: 10px">Graph placeholder</p>
+            <h3>Best Streaks & Records</h3>
+            <div id="streaks-records" style="font-size: 14px; margin-top: 10px">
+              <p>Best Streak: <span id="best-streak">---</span> days</p>
+              <p>Record Steps: <span id="record-steps">---</span></p>
             </div>
           </div>
           <div class="box">
@@ -178,30 +213,11 @@
               <p style="font-size: 12px; margin-top: 10px">Graph placeholder</p>
             </div>
           </div>
-          <div class="box">
-            <h3>Best Streaks & Records</h3>
-            <div id="streaks-records" style="font-size: 14px; margin-top: 10px">
-              <p>Best Streak: <span id="best-streak">---</span> days</p>
-              <p>Record Steps: <span id="record-steps">---</span></p>
-            </div>
-          </div>
-          <div class="box">
-            <h3>Steps by Source</h3>
-            <div id="steps-source" style="font-size: 14px; margin-top: 10px">
+          <div id="graph-box" class="box">
+            <h3>Steps Graph</h3>
+            <div id="steps-source" style="font-size: 14px; margin-top: 10px;">
               <p>Primary Source: <span id="steps-source-value">---</span></p>
             </div>
-          </div>
-          <div class="box">
-            <h3>Device Sync Status</h3>
-            <div id="sync-status" style="font-size: 14px; margin-top: 10px">
-              <p>Last Sync: <span id="last-sync-value">---</span></p>
-            </div>
-          </div>
-          <div class="box">
-            <h3>Activity Insights</h3>
-            <p style="font-size: 14px; margin-top: 10px">
-              Insights placeholder
-            </p>
           </div>
         </div>
       </div>
