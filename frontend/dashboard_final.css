@@ -59,7 +59,6 @@ body {
 
 .right-column {
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, auto);
 }
 
 .box {
@@ -110,6 +109,10 @@ body {
 
 #sign-out-button:hover {
   background-color: #b30000;
+}
+
+#graph-box {
+  grid-column: 1 / -1
 }
 
 .edit-button,
@@ -203,6 +206,13 @@ body {
   .metric-unit {
     font-size: 14px;
   }
+}
+
+@media (min-width: 601px) {
+  .right-column {
+    grid-template-rows: 1fr 2fr;
+  }
+  
 }
 
 .metric-display {
