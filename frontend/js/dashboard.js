@@ -78,6 +78,75 @@ async function loadTodaysStepData(backendId) {
   }
 }
 
+async function loadTodaysCalorieData(backendId) {
+  if (!backendId) {
+    console.error("Cannot fetch today's calories without a backendId.");
+    const editBtn = document.getElementById("edit-calories-button");
+    if (editBtn) editBtn.disabled = true;
+    return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
+  }
+
+  const todayDateString = getTodayDateString();
+  const apiUrl = `${BACKEND_URL}/api/profiles/${backendId}/calories`;
+  console.log(
+    `Fetching today's calories from: ${apiUrl} for date: ${todayDateString}`
+  );
+
+  try {
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      console.error(
+        `API error fetching calories: ${response.status} ${response.statusText}`
+      );
+      try {
+        const errorData = await response.json();
+        console.error("API error details:", errorData);
+      } catch (parseError) {}
+      const editBtn = document.getElementById("edit-calories-button");
+      if (editBtn) editBtn.disabled = true;
+      return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
+    }
+
+    // [{ date: "YYYY-MM-DD", steps: N, id: "uuid", profileId: "uuid" }, ...]
+    const calorieEntries = await response.json();
+
+    if (!Array.isArray(calorieEntries)) {
+      console.error("API response for calories is not an array:", calorieEntries);
+      const editBtn = document.getElementById("edit-calories-button");
+      if (editBtn) editBtn.disabled = true;
+      return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
+    }
+
+    const todayEntry = calorieEntries.find(
+      (entry) => entry.date === todayDateString
+    );
+
+    if (todayEntry && typeof todayEntry.calories === "number") {
+      console.log("Found today's calorie entry:", todayEntry);
+      const editBtn = document.getElementById("edit-calories-button");
+      if (editBtn) editBtn.disabled = false;
+
+      return {
+        steps: 0, // Placeholder
+        calories: todayEntry.calories, // Placeholder
+        distance: 0, // Placeholder
+        activeMinutes: 0, // Placeholder
+      };
+    } else {
+      console.log("No calorie entry found for today:", todayDateString);
+      const editBtn = document.getElementById("edit-calories-button");
+      if (editBtn) editBtn.disabled = false;
+      return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
+    }
+  } catch (error) {
+    console.error("Network or other error fetching today's step data:", error);
+    const editBtn = document.getElementById("edit-calories-button");
+    if (editBtn) editBtn.disabled = true;
+    return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
+  }
+}
+
 async function saveTodaysSteps(backendId, newSteps) {
   if (!backendId) {
     console.error("Cannot save steps without backendId.");
@@ -154,6 +223,82 @@ async function saveTodaysSteps(backendId, newSteps) {
   }
 }
 
+async function saveTodaysCalories(backendId, newCalories) {
+  if (!backendId) {
+    console.error("Cannot save steps without backendId.");
+    return { success: false, message: "User ID missing." };
+  }
+  if (
+    newCalories === null ||
+    newCalories === undefined ||
+    isNaN(newCalories) ||
+    newCalories < 0
+  ) {
+    console.error("Invalid calorie value provided:", newCalories);
+    return {
+      success: false,
+      message: "Invalid calories value. Must be 0 or greater.",
+    };
+  }
+
+  const todayDateString = getTodayDateString();
+  const apiUrl = `${BACKEND_URL}/api/profiles/${backendId}/calories`;
+  const caloriesPayload = {
+    date: todayDateString,
+    calories: Math.round(newCalories),
+  };
+
+  console.log(`Saving calories to: ${apiUrl}`, caloriesPayload);
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(caloriesPayload),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      console.error(
+        `API error saving calories: ${response.status} ${response.statusText}`,
+        responseData
+      );
+      const message =
+        responseData?.message ||
+        `Server error (${response.status}). Could not save calories.`;
+      return { success: false, message: message };
+    }
+
+    if (
+      responseData.success === true ||
+      response.status === 200 ||
+      response.status === 201
+    ) {
+      console.log("Calories saved successfully via API:", responseData);
+      return {
+        success: true,
+        message: "Calories saved!",
+        savedCalories: caloriesPayload.calories,
+      };
+    } else {
+      console.warn(
+        "API response OK, but potentially unsuccessful:",
+        responseData
+      );
+      return {
+        success: false,
+        message: responseData?.message || "Could not confirm save.",
+      };
+    }
+  } catch (error) {
+    console.error("Network or other error saving calorie data:", error);
+    return { success: false, message: "Network error. Could not save calories." };
+  }
+}
+
 async function loadStaticDashboardData() {
   try {
     const response = await fetch("assets/stepsData.json");
@@ -187,8 +332,8 @@ function displayDashboardData(todaysMetrics, staticData) {
     distance: 0,
     activeMinutes: 0,
   };
-  updateMetric("total-steps-today", safeMetrics.steps, "steps");
-  updateMetric("calories-burned", safeMetrics.calories, "kcal");
+  updateMetric("display-steps-container", safeMetrics.steps, "steps");
+  updateMetric("display-calories-container", safeMetrics.calories, "kcal");
   updateMetric("distance-covered", safeMetrics.distance, "km");
   updateMetric("active-minutes", safeMetrics.activeMinutes, "mins");
 
@@ -295,8 +440,8 @@ function updateElementText(elementId, text) {
 
 function displayErrorState(message = "Could not load dashboard data.") {
   console.error("Displaying error state:", message);
-  updateMetric("total-steps-today", "Error", "");
-  updateMetric("calories-burned", "Error", "");
+  updateMetric("display-steps-container", "Error", "");
+  updateMetric("display-calories-container", "Error", "");
   updateMetric("distance-covered", "Error", "");
   updateMetric("active-minutes", "Error", "");
 
@@ -329,8 +474,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   let backendId = null;
   let currentTodaysSteps = 0;
+  let currentTodaysCalories = 0;
 
-  const displayContainer = document.getElementById("display-steps-container");
+  const displayStepsContainer = document.getElementById("display-steps-container");
   const editContainer = document.getElementById("edit-steps-container");
   const editStepsButton = document.getElementById("edit-steps-button");
   const saveStepsButton = document.getElementById("save-steps-button");
@@ -338,9 +484,17 @@ document.addEventListener("DOMContentLoaded", async function () {
   const editStepsInput = document.getElementById("edit-steps-input");
   const editStepsMessage = document.getElementById("edit-steps-message");
 
-  function showEditMode() {
+  const displayCaloriesContainer = document.getElementById("display-calories-container");
+  const editCaloriesContainer = document.getElementById("edit-calories-container");
+  const editCaloriesButton = document.getElementById("edit-calories-button");
+  const saveCaloriesButton = document.getElementById("save-calories-button");
+  const cancelCaloriesButton = document.getElementById("cancel-calories-button");
+  const editCaloriesInput = document.getElementById("edit-calories-input");
+  const editCaloriesMessage = document.getElementById("edit-calories-message");
+
+  function showStepsEditMode() {
     editStepsInput.value = currentTodaysSteps;
-    displayContainer.style.display = "none";
+    displayStepsContainer.style.display = "none";
     editStepsButton.style.display = "none";
     editContainer.style.display = "block";
     editStepsMessage.textContent = "";
@@ -349,27 +503,70 @@ document.addEventListener("DOMContentLoaded", async function () {
     editStepsInput.focus();
   }
 
-  function showDisplayMode(steps) {
-    updateMetric("total-steps-today", steps, "steps");
+  function showCaloriesEditMode() {
+    editCaloriesInput.value = currentTodaysCalories;
+    displayCaloriesContainer.style.display = "none";
+    editCaloriesButton.style.display = "none";
+    editCaloriesContainer.style.display = "block";
+    editCaloriesMessage.textContent = "";
+    saveCaloriesButton.disabled = false;
+    cancelCaloriesButton.disabled = false;
+    editCaloriesInput.focus();
+  }
+
+  function showStepsDisplayMode(steps) {
+    updateMetric("display-steps-container", steps, "steps");
     updateMetric("daily-step-trend", steps, "steps today");
 
     editContainer.style.display = "none";
-    displayContainer.style.display = "block";
+    displayStepsContainer.style.display = "block";
     editStepsButton.style.display = "block";
     editStepsMessage.textContent = "";
+  }
+
+  function showCaloriesDisplayMode(calories) {
+    updateMetric("display-calories-container", calories, "kcal");
+
+    editCaloriesContainer.style.display = "none";
+    displayCaloriesContainer.style.display = "block";
+    editCaloriesButton.style.display = "block";
+    editCaloriesMessage.textContent = "";
+  }
+
+  function showCaloriesDisplayMode(calories) {
+    updateMetric("display-calories-container", calories, "calories");
+
+    editCaloriesContainer.style.display = "none";
+    displayCaloriesContainer.style.display = "block";
+    editCaloriesButton.style.display = "block";
+    editCaloriesMessage.textContent = "";
   }
 
   if (editStepsButton) {
     editStepsButton.addEventListener("click", () => {
       console.log("Edit button clicked. Current steps:", currentTodaysSteps);
-      showEditMode();
+      showStepsEditMode();
+    });
+  }
+
+  if (editCaloriesButton) {
+    editCaloriesButton.addEventListener("click", () => {
+      console.log("Edit button clicked. Current calories:", currentTodaysCalories);
+      showCaloriesEditMode();
     });
   }
 
   if (cancelStepsButton) {
     cancelStepsButton.addEventListener("click", () => {
       console.log("Cancel button clicked.");
-      showDisplayMode(currentTodaysSteps);
+      showStepsDisplayMode(currentTodaysSteps);
+    });
+  }
+
+  if (cancelCaloriesButton) {
+    cancelCaloriesButton.addEventListener("click", () => {
+      console.log("Cancel button clicked.");
+      showCaloriesDisplayMode(currentTodaysCalories);
     });
   }
 
@@ -396,12 +593,47 @@ document.addEventListener("DOMContentLoaded", async function () {
         currentTodaysSteps = result.savedSteps;
         editStepsMessage.textContent = "Saved!";
         setTimeout(() => {
-          showDisplayMode(currentTodaysSteps);
+          showStepsDisplayMode(currentTodaysSteps);
         }, 1000);
       } else {
         editStepsMessage.textContent = `Error: ${result.message}`;
         saveStepsButton.disabled = false;
         cancelStepsButton.disabled = false;
+      }
+    });
+  }
+
+  if (saveCaloriesButton) {
+    saveCaloriesButton.addEventListener("click", async () => {
+      const newCaloriesValue = editCaloriesInput.value.trim();
+      const newCalories = parseInt(newCaloriesValue, 10);
+
+      console.log("Save button clicked. Input value:", newCaloriesValue);
+
+      if (isNaN(newCalories) || newCalories < 0 || newCaloriesValue === "") {
+        editCaloriesMessage.textContent =
+          "Please enter a valid number (0 or greater).";
+        return;
+      }
+
+      saveCaloriesButton.disabled = true;
+      cancelCaloriesButton.disabled = true;
+      editCaloriesMessage.textContent = "Saving...";
+
+      const result = await saveTodaysCalories(backendId, newCalories);
+
+      console.log(result);
+
+      if (result.success) {
+        currentTodaysCalories = result.savedCalories;
+        editCaloriesMessage.textContent = "Saved!";
+        setTimeout(() => {
+          showCaloriesDisplayMode(currentTodaysCalories);
+        }, 1000);
+      } else {
+        editCaloriesMessage.textContent = `Error: ${result.message}`;
+        saveCaloriesButton.disabled = false;
+        cancelCaloriesButton.disabled = false;
       }
     });
   }
@@ -434,11 +666,17 @@ document.addEventListener("DOMContentLoaded", async function () {
           loadStaticDashboardData(),
         ]);
 
+        const calorieMetric = await loadTodaysCalorieData(backendId);
+        todaysMetrics.calories = calorieMetric.calories;
+
         if (todaysMetrics) {
           currentTodaysSteps = todaysMetrics.steps;
+          currentTodaysCalories = todaysMetrics.calories;
         } else {
           currentTodaysSteps = 0;
+          currentTodaysCalories = 0;
           if (editStepsButton) editStepsButton.disabled = true;
+          if (editCaloriesButton) editCaloriesButton.disabled = true;
           console.warn("Initial load for today's metrics failed.");
         }
 
