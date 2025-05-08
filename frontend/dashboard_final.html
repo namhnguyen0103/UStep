@@ -5,6 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fitness Dashboard</title>
     <link rel="stylesheet" href="dashboard_final.css" />
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- <script type="text/javascript">
+
+      function getWeekDate() {
+        const date = new Date();
+        date.setDate(date.getDate() - 6)
+        const weekArr = []
+        for (let i = 0; i < 7; i++) {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          weekArr.push(`${year}-${month}-${day}`);
+          date.setDate(date.getDate() + 1);
+        }
+        return weekArr
+      }
+      
+      const week = getWeekDate();
+
+      // Load the Visualization API and the piechart package.
+      google.charts.load('current', {'packages':['corechart']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawChart);
+
+      // Callback that creates and populates a data table, 
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+
+        // Create the data table.
+        let data = new google.visualization.DataTable();
+        let steps = 100;
+        data.addColumn('string', 'Date');
+        data.addColumn('number', 'Step Count');
+        data.addRows(week.map(day => [day, steps = steps + 100]) );
+
+        // Set chart options
+        let options = {
+          colors: ['#b30000'],
+          vAxis: {title: 'Step Count',
+                  titleTextStyle:{}},
+          legend: 'none'
+        };
+
+        // Instantiate and draw our chart, passing in some options.
+        let chart = new google.visualization.ColumnChart(document.getElementById('myChart'));
+        chart.draw(data, options);
+        window.addEventListener('resize', drawChart);
+      }
+    </script> -->
   </head>
   <body>
     <!-- Friend Tab Bar Button -->
@@ -61,11 +112,9 @@
       <div class="top-row">
         <div class="top-box">
           <h3>Total Steps Today</h3>
-          <div id="display-steps-container">
-            <div class="metric-display" id="total-steps-today">
+          <div id="display-steps-container" class="metric-display">
               <div class="metric-value">---</div>
               <div class="metric-unit">steps</div>
-            </div>
           </div>
           <button id="edit-steps-button" class="edit-button">Edit</button>
           <div
@@ -107,15 +156,13 @@
         </div>
         <div class="top-box">
           <h3>Calories Burned</h3>
-          <div id="display-calories-container"> 
-            <div class="metric-display" id="calories-burned">
+          <div id="display-calories-container" class="metric-display"> 
               <div class="metric-value">---</div>
               <div class="metric-unit">kcal</div>
-            </div>
           </div>
           <button id="edit-calories-button" class="edit-button">Edit</button>
           <div
-          id="edit-steps-container"
+          id="edit-calories-container"
           style="
             display: none;
             width: 100%;
@@ -215,9 +262,10 @@
           </div>
           <div id="graph-box" class="box">
             <h3>Steps Graph</h3>
-            <div id="steps-source" style="font-size: 14px; margin-top: 10px;">
+            <!-- <div id="steps-source" style="font-size: 14px; margin-top: 10px;">
               <p>Primary Source: <span id="steps-source-value">---</span></p>
-            </div>
+            </div> -->
+            <div id="myChart" style="width: 95%; height:400px"></div>
           </div>
         </div>
       </div>
