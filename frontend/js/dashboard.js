@@ -503,6 +503,31 @@ async function loadLeaderboardData(backendId) {
   }
 }
 
+function displayLeaderboardData(leaderboardData, backendId) {
+  const leaderboardBody = document.getElementById("leaderboard-body");
+  if (leaderboardBody) {
+    leaderboardBody.innerHTML = ""; // clear old leaderboard
+    if (leaderboardData && leaderboardData.leaderboard && leaderboardData.leaderboard.length > 0) {
+      leaderboardData.leaderboard.forEach((entry) => {
+        const row = document.createElement("tr");
+        // Highlight current user
+        if (entry.userId === backendId) {
+          row.style.fontWeight = "bold";
+          row.style.backgroundColor = "#fff9c4";
+        }
+        row.innerHTML = `
+          <td>${entry.rank}</td>
+          <td>${entry.username}</td>
+          <td>${entry.totalSteps.toLocaleString()}</td>
+        `;
+        leaderboardBody.appendChild(row);
+      });
+    } else {
+      leaderboardBody.innerHTML = '<tr><td colspan="3">Leaderboard data unavailable.</td></tr>';
+    }
+  }
+}
+
 async function displayDashboardData(todaysMetrics, staticData, backendId) {
   const safeMetrics = todaysMetrics || {
     steps: 0,
@@ -515,8 +540,8 @@ async function displayDashboardData(todaysMetrics, staticData, backendId) {
   // Update basic metrics
   updateMetric("display-steps-container", safeMetrics.steps, "steps");
   updateMetric("display-calories-container", safeMetrics.calories, "kcal");
-  updateMetric("distance-covered", safeMetrics.distance, "km");
-  updateMetric("active-minutes", safeMetrics.activeMinutes, "mins");
+  updateMetric("distance-covered", safeMetrics.steps * 2.4, "meters");
+  updateMetric("active-minutes", Math.ceil(safeMetrics.steps / 100), "mins");
   updateMetric("weekly-progress", safeMetrics.weekSteps, "steps this week");
 
   // Handle edit button state
@@ -726,6 +751,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       editStepsMessage.textContent = "Saving...";
 
       const result = await saveTodaysSteps(backendId, newSteps);
+      const leaderboardData = await loadLeaderboardData(backendId);
 
       if (result.success) {
         currentTodaysSteps = result.savedSteps;
@@ -739,6 +765,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           updateMetric("weekly-progress", weekProgress, "steps this week");
           updateMetric("distance-covered", currentDistanceCovered, "feet");
           updateMetric("active-minutes", currentActiveMinutes, "mins");
+          displayLeaderboardData(leaderboardData, backendId);
           drawChart();
         }, 1000);
         await updateRecordAndStreak(backendId);
