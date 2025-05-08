@@ -47,7 +47,7 @@ async function loadTodaysStepData(backendId) {
       try {
         const errorData = await response.json();
         console.error("API error details:", errorData);
-      } catch (parseError) {}
+      } catch (parseError) { }
       const editBtn = document.getElementById("edit-steps-button");
       if (editBtn) editBtn.disabled = true;
       return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
@@ -115,7 +115,7 @@ async function getWeekStepData(backendId) {
       try {
         const errorData = await response.json();
         console.error("API error details:", errorData);
-      } catch (parseError) {}
+      } catch (parseError) { }
       return weekArr.map(day => [day, 0]);
     }
 
@@ -172,7 +172,7 @@ async function loadTodaysCalorieData(backendId) {
       try {
         const errorData = await response.json();
         console.error("API error details:", errorData);
-      } catch (parseError) {}
+      } catch (parseError) { }
       const editBtn = document.getElementById("edit-calories-button");
       if (editBtn) editBtn.disabled = true;
       return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
@@ -395,20 +395,57 @@ async function loadStaticDashboardData() {
   }
 }
 
-function displayDashboardData(todaysMetrics, staticData) {
+async function loadLeaderboardData(backendId) {
+  if (!backendId) {
+    console.error("Cannot fetch leaderboard without a backendId.");
+    return null;
+  }
+
+  const apiUrl = `${BACKEND_URL}/api/leaderboard/${backendId}`;
+  console.log(`Fetching leaderboard from: ${apiUrl}`);
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.error(`API error fetching leaderboard: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json();
+    if (!data.success) {
+      console.error("API returned unsuccessful response:", data);
+      return null;
+    }
+
+    return data.data;
+  } catch (error) {
+    console.error("Network or other error fetching leaderboard:", error);
+    return null;
+  }
+}
+
+async function displayDashboardData(todaysMetrics, staticData, backendId) {
   const safeMetrics = todaysMetrics || {
     steps: 0,
     calories: 0,
     distance: 0,
     activeMinutes: 0,
-    weekSteps: 0,
   };
-  updateMetric("display-steps-container", safeMetrics.steps, "steps");
-  updateMetric("display-calories-container", safeMetrics.calories, "kcal");
-  updateMetric("distance-covered", safeMetrics.steps * 2.4, "feet");
-  updateMetric("active-minutes", Math.ceil(safeMetrics.steps / 100), "mins");
-  updateMetric("weekly-progress", safeMetrics.weekSteps, "steps this week");
 
+  // Update basic metrics
+  updateMetric("total-steps-today", safeMetrics.steps, "steps");
+  updateMetric("calories-burned", safeMetrics.calories, "kcal");
+  updateMetric("distance-covered", safeMetrics.distance, "km");
+  updateMetric("active-minutes", safeMetrics.activeMinutes, "mins");
+
+  // Handle edit button state
   const editBtn = document.getElementById("edit-steps-button");
   const canEdit = todaysMetrics !== null;
   if (editBtn) {
@@ -418,41 +455,39 @@ function displayDashboardData(todaysMetrics, staticData) {
     }
   }
 
-  if (staticData) {
-    const leaderboardBody = document.getElementById("leaderboard-body");
-    if (leaderboardBody) {
-      leaderboardBody.innerHTML = ""; // clear old leaderboard
-      if (staticData.leaderboard && staticData.leaderboard.length > 0) {
-        staticData.leaderboard.forEach((entry) => {
-          const row = document.createElement("tr");
-          // Highlight your block
-          if (entry.name.toLowerCase() === "you") {
-            row.style.fontWeight = "bold";
-            row.style.backgroundColor = "#fff9c4";
-          }
-          row.innerHTML = `
-                        <td>${entry.rank}</td>
-                        <td>${entry.name}</td>
-                        <td>${entry.steps.toLocaleString()}</td>
-                    `;
-          leaderboardBody.appendChild(row);
-        });
-      } else {
-        leaderboardBody.innerHTML =
-          '<tr><td colspan="3">Leaderboard data unavailable.</td></tr>';
-      }
+  // Load and display real leaderboard data
+  const leaderboardData = await loadLeaderboardData(backendId);
+  const leaderboardBody = document.getElementById("leaderboard-body");
+  if (leaderboardBody) {
+    leaderboardBody.innerHTML = ""; // clear old leaderboard
+    if (leaderboardData && leaderboardData.leaderboard && leaderboardData.leaderboard.length > 0) {
+      leaderboardData.leaderboard.forEach((entry) => {
+        const row = document.createElement("tr");
+        // Highlight current user
+        if (entry.userId === backendId) {
+          row.style.fontWeight = "bold";
+          row.style.backgroundColor = "#fff9c4";
+        }
+        row.innerHTML = `
+          <td>${entry.rank}</td>
+          <td>${entry.username}</td>
+          <td>${entry.totalSteps.toLocaleString()}</td>
+        `;
+        leaderboardBody.appendChild(row);
+      });
     } else {
-      console.error("Leaderboard body not found");
+      leaderboardBody.innerHTML = '<tr><td colspan="3">Leaderboard data unavailable.</td></tr>';
     }
+  }
 
+  // Update other metrics if static data is available
+  if (staticData) {
     updateMetric("daily-step-trend", safeMetrics.steps, "steps today");
-
-    // updateMetric(
-    //   "weekly-progress",
-    //   staticData.weeklyTotalSteps ?? "---",
-    //   "steps this week"
-    // );
-
+    updateMetric(
+      "weekly-progress",
+      staticData.weeklyTotalSteps ?? "---",
+      "steps this week"
+    );
     updateElementText(
       "best-streak",
       staticData.bestStreak?.toLocaleString() ?? "---"
@@ -461,27 +496,8 @@ function displayDashboardData(todaysMetrics, staticData) {
       "record-steps",
       staticData.recordSteps?.toLocaleString() ?? "---"
     );
-
     updateElementText("steps-source-value", staticData.stepsSource ?? "---");
     updateElementText("last-sync-value", staticData.lastSync ?? "---");
-
-    // TODO: Update graph placeholders using staticData.dailySteps or future API data
-  } else {
-    // handle case where static data failed to load
-    console.error(
-      "Static dashboard data failed to load. Displaying placeholders."
-    );
-
-    const leaderboardBody = document.getElementById("leaderboard-body");
-    if (leaderboardBody)
-      leaderboardBody.innerHTML =
-        '<tr><td colspan="3">Could not load leaderboard data.</td></tr>';
-    updateMetric("daily-step-trend", safeMetrics.steps, "steps today");
-    updateMetric("weekly-progress", "---", "steps this week");
-    updateElementText("best-streak", "---");
-    updateElementText("record-steps", "---");
-    updateElementText("steps-source-value", "---");
-    updateElementText("last-sync-value", "---");
   }
 }
 
@@ -753,7 +769,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         ]);
 
         const calorieMetric = await loadTodaysCalorieData(backendId);
-        todaysMetrics.calories = calorieMetric.calories; 
+        todaysMetrics.calories = calorieMetric.calories;
 
         const weekStepData = await getWeekStepData(backendId);
 
@@ -774,14 +790,13 @@ document.addEventListener("DOMContentLoaded", async function () {
           console.warn("Initial load for today's metrics failed.");
         }
 
-
         if (staticData === null) {
           console.warn(
             "Static data failed to load, some dashboard sections might be empty."
           );
-          displayDashboardData(todaysMetrics, null);
+          displayDashboardData(todaysMetrics, null, backendId);
         } else {
-          displayDashboardData(todaysMetrics, staticData);
+          displayDashboardData(todaysMetrics, staticData, backendId);
         }
       } else {
         // user exists locally but is missing backendId
@@ -861,7 +876,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   // Load the Visualization API and the piechart package.
-  google.charts.load('current', {'packages':['corechart']});
+  google.charts.load('current', { 'packages': ['corechart'] });
 
   // Set a callback to run when the Google Visualization API is loaded.
   google.charts.setOnLoadCallback(drawChart);
@@ -879,8 +894,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Set chart options
     let options = {
       colors: ['#b30000'],
-      vAxis: {title: 'Step Count',
-              titleTextStyle:{}},
+      vAxis: {
+        title: 'Step Count',
+        titleTextStyle: {}
+      },
       legend: 'none'
     };
 
