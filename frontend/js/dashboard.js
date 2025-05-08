@@ -1,6 +1,77 @@
 import { UserDatabase } from "./userdb.js";
 import { BACKEND_URL } from "./config.js";
 
+// ─── Helpers to show record & best streak in the DOM ──────────────────
+function showRecord(record) {
+  const el = document.getElementById("record-steps");
+  if (el) el.textContent = record.toLocaleString();
+}
+function showBestStreak(days) {
+  const el = document.getElementById("best-streak");
+  if (el) el.textContent = days;
+}
+
+/**
+ * Given an array of { date: 'YYYY-MM-DD', steps: Number },
+ * sorted from most-recent to oldest, compute the
+ * longest run of consecutive days.
+ */
+/**
+ * entries: Array<{date: 'YYYY-MM-DD', steps: number}>
+ * returns the longest run of consecutive days.
+ */
+
+async function updateRecordAndStreak(backendId) {
+  try {
+    // grab all entries
+    const allEntries = await fetch(`${BACKEND_URL}/api/profiles/${backendId}/steps`)
+                              .then(r => r.ok ? r.json() : Promise.reject(r.status));
+    // record = highest daily steps
+    const record = allEntries.length
+      ? Math.max(...allEntries.map(e => e.steps))
+      : 0;
+    // streak = longest run
+    const streak = computeBestStreak(allEntries);
+
+    // paint
+    showRecord(record);
+    showBestStreak(streak);
+  } catch (err) {
+    console.error("Error updating record & streak:", err);
+  }
+}
+
+
+
+function computeBestStreak(entries) {
+  if (!entries || entries.length === 0) return 0;
+
+  // 1) sort newest → oldest
+  const sorted = entries
+    .slice()
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  // 2) walk the sorted array, counting runs where day difference === 1
+  let maxStreak = 0;
+  let currStreak = 1;
+
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1].date);
+    const curr = new Date(sorted[i].date);
+    const diffDays = (prev - curr) / (1000 * 60 * 60 * 24);
+
+    if (diffDays === 1) {
+      currStreak++;
+    } else {
+      maxStreak = Math.max(maxStreak, currStreak);
+      currStreak = 1;
+    }
+  }
+
+  return Math.max(maxStreak, currStreak);
+}
+
+
 function getTodayDateString() {
   const today = new Date();
   const year = today.getFullYear();
@@ -345,6 +416,7 @@ async function saveTodaysCalories(backendId, newCalories) {
     if (
       responseData.success === true ||
       response.status === 200 ||
+
       response.status === 201
     ) {
       console.log("Calories saved successfully via API:", responseData);
@@ -483,19 +555,6 @@ async function displayDashboardData(todaysMetrics, staticData, backendId) {
   }
 
   // Update other metrics if static data is available
-  if (staticData) {
-    updateMetric("daily-step-trend", safeMetrics.steps, "steps today");
-    updateElementText(
-      "best-streak",
-      staticData.bestStreak?.toLocaleString() ?? "---"
-    );
-    updateElementText(
-      "record-steps",
-      staticData.recordSteps?.toLocaleString() ?? "---"
-    );
-    updateElementText("steps-source-value", staticData.stepsSource ?? "---");
-    updateElementText("last-sync-value", staticData.lastSync ?? "---");
-  }
 }
 
 function updateMetric(elementId, value, unit) {
@@ -537,12 +596,9 @@ function displayErrorState(message = "Could not load dashboard data.") {
   if (leaderboardBody) {
     leaderboardBody.innerHTML = `<tr><td colspan="3">${message}</td></tr>`;
   }
-  // updateMetric("daily-step-trend", "Error", "");
   updateMetric("weekly-progress", "Error", "");
   updateElementText("best-streak", "Error");
   updateElementText("record-steps", "Error");
-  // updateElementText("steps-source-value", "Error");
-  // updateElementText("last-sync-value", "Error");
 
   const dailyGraph = document.getElementById("daily-trend-graph");
   if (dailyGraph)
@@ -624,15 +680,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     editCaloriesMessage.textContent = "";
   }
 
-  function showCaloriesDisplayMode(calories) {
-    updateMetric("display-calories-container", calories, "calories");
-
-    editCaloriesContainer.style.display = "none";
-    displayCaloriesContainer.style.display = "block";
-    editCaloriesButton.style.display = "block";
-    editCaloriesMessage.textContent = "";
-  }
-
   if (editStepsButton) {
     editStepsButton.addEventListener("click", () => {
       console.log("Edit button clicked. Current steps:", currentTodaysSteps);
@@ -694,6 +741,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           updateMetric("active-minutes", currentActiveMinutes, "mins");
           drawChart();
         }, 1000);
+        await updateRecordAndStreak(backendId);
       } else {
         editStepsMessage.textContent = `Error: ${result.message}`;
         saveStepsButton.disabled = false;
@@ -786,15 +834,13 @@ document.addEventListener("DOMContentLoaded", async function () {
           if (editCaloriesButton) editCaloriesButton.disabled = true;
           console.warn("Initial load for today's metrics failed.");
         }
+        await displayDashboardData(todaysMetrics, null, backendId);
+        await updateRecordAndStreak(backendId);
+        
+        // ─── Live-fetch record & best-streak ──────────────────────────
+      
+        // ───────────────────────────────────────────────────────────────
 
-        if (staticData === null) {
-          console.warn(
-            "Static data failed to load, some dashboard sections might be empty."
-          );
-          displayDashboardData(todaysMetrics, null, backendId);
-        } else {
-          displayDashboardData(todaysMetrics, staticData, backendId);
-        }
       } else {
         // user exists locally but is missing backendId
         console.error(
@@ -816,7 +862,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (userEmailDisplay) userEmailDisplay.textContent = "Error";
       localStorage.removeItem("currentUser");
       displayErrorState("Failed to load user data. Please log in again.");
-      // go back to login
       setTimeout(() => {
         window.location.href = "loginPage.html";
       }, 2000);
@@ -905,3 +950,4 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
 });
+
