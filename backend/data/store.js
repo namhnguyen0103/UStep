@@ -324,3 +324,55 @@ export const removeDeviceById = async (id) => {
   const deletedRowCount = await Device.destroy({ where: { id } });
   return deletedRowCount > 0;
 };
+
+export const getWeeklyStepsForUser = async (userId, startDate, endDate) => {
+  const steps = await Step.findAll({
+    where: {
+      userId,
+      date: {
+        [Op.between]: [startDate, endDate]
+      }
+    },
+    order: [['date', 'ASC']],
+    raw: true
+  });
+
+  return steps.reduce((total, record) => total + record.steps, 0);
+};
+
+export const getLeaderboardData = async (userId, startDate, endDate) => {
+  // Get user's friends
+  const friends = await findFriendsByUserId(userId);
+  const friendIds = friends.map(f => f.profile.id);
+
+  // Include the user themselves in the list
+  const allUserIds = [userId, ...friendIds];
+
+  // Get step counts for all users
+  const leaderboardData = await Promise.all(
+    allUserIds.map(async (uid) => {
+      const totalSteps = await getWeeklyStepsForUser(uid, startDate, endDate);
+      const user = await getProfileById(uid);
+      return {
+        userId: uid,
+        username: user.first_name + ' ' + user.last_name,
+        totalSteps,
+        rank: 0 // Will be calculated after sorting
+      };
+    })
+  );
+
+  // Sort by total steps and add ranks
+  const sortedData = leaderboardData
+    .sort((a, b) => b.totalSteps - a.totalSteps)
+    .map((entry, index) => ({
+      ...entry,
+      rank: index + 1
+    }));
+
+  return {
+    startDate,
+    endDate,
+    leaderboard: sortedData
+  };
+};
