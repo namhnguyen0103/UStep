@@ -9,6 +9,20 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function getWeekArray() {
+  const date = new Date();
+  date.setDate(date.getDate() - 6)
+  const weekArr = []
+  for (let i = 0; i < 7; i++) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    weekArr.push(`${year}-${month}-${day}`);
+    date.setDate(date.getDate() + 1);
+  }
+  return weekArr
+}
+
 async function loadTodaysStepData(backendId) {
   if (!backendId) {
     console.error("Cannot fetch today's steps without a backendId.");
@@ -75,6 +89,62 @@ async function loadTodaysStepData(backendId) {
     const editBtn = document.getElementById("edit-steps-button");
     if (editBtn) editBtn.disabled = true;
     return { steps: 0, calories: 0, distance: 0, activeMinutes: 0 };
+  }
+}
+
+async function getWeekStepData(backendId) {
+  const weekArr = getWeekArray();
+
+  if (!backendId) {
+    console.error("Cannot fetch today's this week's steps without a backendId.");
+    return weekArr.map(day => [day, 0]);
+  }
+
+  const apiUrl = `${BACKEND_URL}/api/profiles/${backendId}/steps`;
+  console.log(
+    `Fetching this week's steps from: ${apiUrl}`
+  );
+
+  try {
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      console.error(
+        `API error fetching this week's steps: ${response.status} ${response.statusText}`
+      );
+      try {
+        const errorData = await response.json();
+        console.error("API error details:", errorData);
+      } catch (parseError) {}
+      return weekArr.map(day => [day, 0]);
+    }
+
+    // [{ date: "YYYY-MM-DD", steps: N, id: "uuid", profileId: "uuid" }, ...]
+    const stepEntries = await response.json();
+
+    if (!Array.isArray(stepEntries)) {
+      console.error("API response for this week's steps is not an array:", stepEntries);
+      return weekArr.map(day => [day, 0]);
+    }
+
+    const weekEntry = stepEntries.filter((entry) => weekArr.includes(entry.date))
+
+    if (weekEntry) {
+      console.log("Found this week's steps entry:", weekEntry);
+      return weekArr.map(day => {
+        const entry = weekEntry.find(e => e.date === day)
+        if (entry)
+          return [day, entry.steps];
+        else
+          return [day, 0];
+      })
+    } else {
+      console.log("No week steps entry found for today:", todayDateString);
+      return weekArr.map(day => [day, 0]);
+    }
+  } catch (error) {
+    console.error("Network or other error fetching week's step data:", error);
+    return weekArr.map(day => [day, 0]);
   }
 }
 
@@ -469,12 +539,17 @@ function displayErrorState(message = "Could not load dashboard data.") {
       '<p style="font-size: 12px; margin-top: 10px; color: red;">Graph Error</p>';
 }
 
+
+
 document.addEventListener("DOMContentLoaded", async function () {
   console.log("DOM fully loaded.");
 
   let backendId = null;
   let currentTodaysSteps = 0;
   let currentTodaysCalories = 0;
+
+  const weekArr = getWeekArray()
+  let weekSteps = weekArr.map((day) => [day, 0]);
 
   const displayStepsContainer = document.getElementById("display-steps-container");
   const editContainer = document.getElementById("edit-steps-container");
@@ -591,9 +666,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       if (result.success) {
         currentTodaysSteps = result.savedSteps;
+        weekSteps[weekSteps.length - 1][1] = result.savedSteps;
         editStepsMessage.textContent = "Saved!";
         setTimeout(() => {
           showStepsDisplayMode(currentTodaysSteps);
+          drawChart();
         }, 1000);
       } else {
         editStepsMessage.textContent = `Error: ${result.message}`;
@@ -667,7 +744,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         ]);
 
         const calorieMetric = await loadTodaysCalorieData(backendId);
-        todaysMetrics.calories = calorieMetric.calories;
+        todaysMetrics.calories = calorieMetric.calories; 
 
         if (todaysMetrics) {
           currentTodaysSteps = todaysMetrics.steps;
@@ -678,6 +755,12 @@ document.addEventListener("DOMContentLoaded", async function () {
           if (editStepsButton) editStepsButton.disabled = true;
           if (editCaloriesButton) editCaloriesButton.disabled = true;
           console.warn("Initial load for today's metrics failed.");
+        }
+
+        const weekStepData = await getWeekStepData(backendId);
+
+        if (weekStepData) {
+          weekSteps = weekStepData;
         }
 
         if (staticData === null) {
@@ -764,4 +847,39 @@ document.addEventListener("DOMContentLoaded", async function () {
       return Promise.reject(`Error during logout DB update: ${error.message}`);
     }
   }
+
+  const week = getWeekArray();
+
+  // Load the Visualization API and the piechart package.
+  google.charts.load('current', {'packages':['corechart']});
+
+  // Set a callback to run when the Google Visualization API is loaded.
+  google.charts.setOnLoadCallback(drawChart);
+
+  // Callback that creates and populates a data table, 
+  // instantiates the pie chart, passes in the data and
+  // draws it.
+  function drawChart() {
+    // Create the data table.
+    let data = new google.visualization.DataTable();
+    let steps = 100;
+    data.addColumn('string', 'Date');
+    data.addColumn('number', 'Step Count');
+    const entries = 
+    data.addRows(weekSteps);
+
+    // Set chart options
+    let options = {
+      colors: ['#b30000'],
+      vAxis: {title: 'Step Count',
+              titleTextStyle:{}},
+      legend: 'none'
+    };
+
+    // Instantiate and draw our chart, passing in some options.
+    let chart = new google.visualization.ColumnChart(document.getElementById('myChart'));
+    chart.draw(data, options);
+    window.addEventListener('resize', drawChart);
+  }
+
 });
