@@ -1,0 +1,47 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body class="auth-page">
+    <div class="auth-wrapper">
+      <div class="auth-image-section">
+        <a href="index.html">
+          <img src="assets/running.png" alt="" />
+        </a>
+      </div>
+      <div class="auth-form-section">
+        <h2>Create an Account</h2>
+        <p class="auth-switch-link">
+          Already have an account? <a href="loginPage.html">Login</a>
+        </p>
+        <form id="signupForm">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" required />
+
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" required />
+
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" required />
+
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
+
+          <div id="passwordStrength" class="password-strength"></div>
+
+          <div id="formMessage" class="form-message"></div>
+
+          <button type="submit" class="button button-primary button-full">
+            Create an account
+          </button>
+        </form>
+        <p class="auth-home-link"><a href="index.html">Back to Home</a></p>
+      </div>
+    </div>
+
+    <script type="module" src="js/signup.js"></script>
+  </body>
+</html>

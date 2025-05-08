@@ -1,0 +1,16 @@
+
+/.vscode
+/output
+backend/node_modules/
+./backend/package-lock.json
+./backend/bun.lockb
+./backend/npm-shrinkwrap.json
+./backend/*.log
+./backend/*.gz
+
+# Coveralls
+.env
+backend/.env
+backend/.idea
+backend/.storage/
+backend.zip

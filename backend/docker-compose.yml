@@ -1,0 +1,13 @@
+services:
+  ustep-backend:
+    build: .
+    volumes:
+      - storage_data:/app/.storage
+    ports:
+      - '5806:4000'
+    env_file:
+      - .env
+    restart: always
+
+volumes:
+  storage_data:

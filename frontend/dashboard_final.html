@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fitness Dashboard</title>
+    <link rel="stylesheet" href="dashboard_final.css" />
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  </head>
+  <body>
+    <!-- Friend Tab Bar Button -->
+    <button id="friend-side-bar-button">☰</button>
+    <!-- Friend Tab Bar -->
+    <div id="friend-side-bar">
+      <button id="friend-side-bar-close">×</button>
+      <h2>Search Users</h2>
+      <input
+        type="email"
+        id="friend-search-bar"
+        placeholder="Search by name or email"
+        style="
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        "
+      />
+      <ul
+        id="friend-search-results"
+        style="
+          max-height: 150px;
+          overflow-y: auto;
+          border: 1px solid #eee;
+          margin-bottom: 20px;
+          padding: 0;
+        "
+      >
+        <li
+          id="search-placeholder"
+          style="padding: 8px 10px; color: #888; font-style: italic"
+        >
+          Start typing to search...
+        </li>
+      </ul>
+
+      <h3>Current Friends</h3>
+      <ul
+        id="friend-list"
+        style="max-height: calc(100vh - 250px); overflow-y: auto"
+      >
+        <li id="friend-list-loading" style="padding: 8px 0; color: #888">
+          Loading friends...
+        </li>
+      </ul>
+    </div>
+
+    <div class="container">
+      <h1 style="text-align: center; margin-bottom: 20px">
+        Welcome Back, <span id="user-email-display">User</span>!
+      </h1>
+      <div class="top-row">
+        <div class="top-box">
+          <h3>Total Steps Today</h3>
+          <div id="display-steps-container" class="metric-display">
+              <div class="metric-value">---</div>
+              <div class="metric-unit">steps</div>
+          </div>
+          <button id="edit-steps-button" class="edit-button">Edit</button>
+          <div
+          id="edit-steps-container"
+          style="
+            display: none;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+          "
+        >
+          <input
+            type="number"
+            id="edit-steps-input"
+            min="0"
+            step="1"
+            style="
+              padding: 8px;
+              width: 60%;
+              margin-bottom: 10px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+            "
+          />
+          <div
+            class="edit-controls"
+            style="display: flex; justify-content: center; gap: 10px"
+          >
+            <button id="save-steps-button" class="save-button">Save</button>
+            <button id="cancel-steps-button" class="cancel-button">
+              Cancel
+            </button>
+          </div>
+          <p
+            id="edit-steps-message"
+            style="font-size: 12px; color: red; margin-top: 5px; height: 15px"
+          ></p>
+          </div>
+        </div>
+        <div class="top-box">
+          <h3>Calories Burned</h3>
+          <div id="display-calories-container" class="metric-display"> 
+              <div class="metric-value">---</div>
+              <div class="metric-unit">kcal</div>
+          </div>
+          <button id="edit-calories-button" class="edit-button">Edit</button>
+          <div
+          id="edit-calories-container"
+          style="
+            display: none;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+          "
+        >
+          <input
+            type="number"
+            id="edit-calories-input"
+            min="0"
+            step="1"
+            style="
+              padding: 8px;
+              width: 60%;
+              margin-bottom: 10px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+            "
+          />
+          <div
+            class="edit-controls"
+            style="display: flex; justify-content: center; gap: 10px"
+          >
+            <button id="save-calories-button" class="save-button">Save</button>
+            <button id="cancel-calories-button" class="cancel-button">
+              Cancel
+            </button>
+          </div>
+          <p
+            id="edit-calories-message"
+            style="font-size: 12px; color: red; margin-top: 5px; height: 15px"
+          ></p>
+          </div>
+        </div>
+        <div class="top-box">
+          <h3>Distance Covered</h3>
+          <div class="metric-display" id="distance-covered">
+            <div class="metric-value">---</div>
+            <div class="metric-unit">km</div>
+          </div>
+        </div>
+        <div class="top-box">
+          <h3>Active Minutes</h3>
+          <div class="metric-display" id="active-minutes">
+            <div class="metric-value">---</div>
+            <div class="metric-unit">mins</div>
+          </div>
+        </div>
+      </div>
+      <div class="middle-section">
+        <div class="left-column">
+          <div class="box">
+            <h3>Leaderboard (Weekly)</h3>
+            <div
+              class="leaderboard-container"
+              style="width: 100%; max-height: 250px; overflow-y: auto"
+            >
+              <table class="leaderboard-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Steps</th>
+                  </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                  <tr>
+                    <td colspan="3">Loading...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="box sign-out">
+            <h3>Sign Out</h3>
+            <button id="sign-out-button">Sign Out</button>
+          </div>
+        </div>
+        <div class="right-column">
+          <div class="box">
+            <h3>Best Streaks & Records</h3>
+            <div id="streaks-records" style="font-size: 14px; margin-top: 10px">
+              <p>Best Streak: <span id="best-streak">---</span> days</p>
+              <p>Record Steps: <span id="record-steps">---</span></p>
+            </div>
+          </div>
+          <div class="box">
+            <h3>Weekly Progress</h3>
+            <div class="metric-display" id="weekly-progress">
+              <div class="metric-value" style="font-size: 50px;">---</div>
+              <div class="metric-unit">steps this week</div>
+            </div>
+          </div>
+          <div id="graph-box" class="box">
+            <h3>Steps Graph</h3>
+            <div id="myChart" style="width: 95%; height:400px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./js/dashboard.js"></script>
+    <script type="module" src="./js/dashboard-friend.js"></script>
+  </body>
+</html>

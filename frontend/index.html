@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Landing Page</title>
+    <link rel="stylesheet" href="main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Header -->
+    <div id="header-wrapper" class="row-layout">
+      <div>
+        <a
+          href="index.html"
+          style="text-decoration: none; display: flex; align-items: center"
+        >
+          <span class="dot"></span>
+          <p id="brand-title">UStep</p>
+        </a>
+      </div>
+      <div id="navLinks">
+        <a href="loginPage.html" class="header-link button" style="margin-right: 25px">
+          <img
+            src="./assets/user.svg"
+            style="
+              width: 30px;
+              height: 30px;
+              margin-right: 3px;
+              vertical-align: middle;
+            "
+          />
+          <p style="display: inline-block; vertical-align: middle">
+            My Account
+          </p>
+        </a>
+        <a
+          href="signUpPage.html"
+          id="joinNowButton"
+          class="button button-primary"
+          >Join now</a
+        >
+      </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div id="hero-wrapper">
+      <p id="mission-statement">Your Steps, Your Journey, Together.</p>
+    </div>
+
+    <!-- Feature Section -->
+    <div class="feature-wrapper">
+      <h2>HOW IT WORKS</h2>
+      <!-- Features -->
+      <div class="list-wrapper">
+        <div class="feature">
+          <img src="./assets/cloud_red.svg" alt="Cloud Icon" />
+          <h3>Track Your Steps</h3>
+          <p>
+            Connect with Apple Health or Samsung Health to automatically sync
+            your steps.
+          </p>
+        </div>
+        <div class="feature">
+          <img src="./assets/pin_red.svg" alt="Pin Icon" />
+          <h3>Visualize Progress</h3>
+          <p>
+            See your activity trends with insightful charts and graphs over
+            time.
+          </p>
+        </div>
+        <div class="feature">
+          <img src="./assets/iPhone_red.svg" alt="Phone Icon" />
+          <h3>Compete with Friends</h3>
+          <ul id="current-friends"></ul>
+          <p>
+            Add friends, view their progress, and climb the leaderboard
+            together.
+          </p>
+        </div>
+      </div>
+    </div>
+    <hr class="section-divider" />
+
+    <!-- Benefit Section -->
+    <div class="feature-wrapper">
+      <h2>BENEFITS</h2>
+      <!-- Benefits -->
+      <div class="list-wrapper">
+        <div class="feature">
+          <img src="./assets/cloud_red.svg" alt="Cloud Icon" />
+          <h3>Stay Motivated</h3>
+          <p>
+            Gamified experience and social features keep you engaged and moving.
+          </p>
+        </div>
+        <div class="feature">
+          <img src="./assets/pin_red.svg" alt="Pin Icon" />
+          <h3>Understand Activity</h3>
+          <p>
+            Gain awareness of your daily activity levels and make healthier
+            choices.
+          </p>
+        </div>
+        <div class="feature">
+          <img src="./assets/iPhone_red.svg" alt="Phone Icon" />
+          <h3>Build Community</h3>
+          <p>Connect with friends and support each other's fitness goals.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call to Action Section -->
+    <div id="coa-wrapper">
+      <div>
+        <div style="align-items: left;">
+          <div style="margin-bottom: 3rem">
+            <p
+              style="
+                font-size: 40px;
+                font-weight: 700;
+                margin-bottom: 1rem;
+                color: #191919;
+              "
+            >
+              Ready to Step Up?
+            </p>
+            <p style="color: #191919">
+              Join UStep today and turn your daily walks into a fun, engaging, and
+              social fitness journey. Sign up now!
+            </p>
+          </div>
+          <a
+            href="signUpPage.html"
+            id="getStartedButton"
+            class="button button-large"
+            >Get started</a
+          >
+        </div>
+        <div style="align-self: flex-start">
+          <!-- Placeholder -->
+          <img
+            src="./assets/running.png"
+            alt="Runner illustration"
+            class="coa-image"
+          />
+          <!-- placeholder TODO -->
+          <!-- <div style="width: 350px; height: 400px; background-color: #F5F5F5">
+            <p>Image here</p>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer-wrapper">
+      <p>©2025 UStep</p>
+      <div>
+        <p style="margin-right: 15px">Follow us:</p>
+        <a
+          href="https://github.com/namhnguyen0103/UStep"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src="./assets/github-mark-white.svg"
+            style="width: 35px; vertical-align: middle"
+            alt="GitHub Icon"
+          />
+        </a>
+      </div>
+    </div>
+
+    <script type="module" src="js/index.js"></script>
+  </body>
+</html>

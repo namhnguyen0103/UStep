@@ -1,0 +1,32 @@
+{
+  "name": "express-ustep-backend",
+  "version": "1.0.0",
+  "description": "Express.js migration of Ustep backend",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "start:bun": "bun server.js",
+    "dev": "nodemon server.js",
+    "format": "prettier --write \"data/**/*.js\" \"routes/**/*.js\" \"utils/**/*.js\" \"validators/**/*.js\" \"server.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sequelize/sqlite3": "^7.0.0-alpha.46",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.0.1",
+    "pino-http": "^10.0.0",
+    "pino-pretty": "^11.0.0",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "eslint": "^9.25.1",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.5.3"
+  }
+}
