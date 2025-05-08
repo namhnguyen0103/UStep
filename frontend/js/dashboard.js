@@ -11,7 +11,7 @@ function getTodayDateString() {
 
 function getWeekArray() {
   const date = new Date();
-  date.setDate(date.getDate() - 6)
+  date.setDate(date.getDate() - date.getDay())
   const weekArr = []
   for (let i = 0; i < 7; i++) {
     const year = date.getFullYear();
@@ -401,11 +401,13 @@ function displayDashboardData(todaysMetrics, staticData) {
     calories: 0,
     distance: 0,
     activeMinutes: 0,
+    weekSteps: 0,
   };
   updateMetric("display-steps-container", safeMetrics.steps, "steps");
   updateMetric("display-calories-container", safeMetrics.calories, "kcal");
-  updateMetric("distance-covered", safeMetrics.distance, "km");
-  updateMetric("active-minutes", safeMetrics.activeMinutes, "mins");
+  updateMetric("distance-covered", safeMetrics.steps * 2.4, "feet");
+  updateMetric("active-minutes", Math.ceil(safeMetrics.steps / 100), "mins");
+  updateMetric("weekly-progress", safeMetrics.weekSteps, "steps this week");
 
   const editBtn = document.getElementById("edit-steps-button");
   const canEdit = todaysMetrics !== null;
@@ -445,11 +447,11 @@ function displayDashboardData(todaysMetrics, staticData) {
 
     updateMetric("daily-step-trend", safeMetrics.steps, "steps today");
 
-    updateMetric(
-      "weekly-progress",
-      staticData.weeklyTotalSteps ?? "---",
-      "steps this week"
-    );
+    // updateMetric(
+    //   "weekly-progress",
+    //   staticData.weeklyTotalSteps ?? "---",
+    //   "steps this week"
+    // );
 
     updateElementText(
       "best-streak",
@@ -539,14 +541,15 @@ function displayErrorState(message = "Could not load dashboard data.") {
       '<p style="font-size: 12px; margin-top: 10px; color: red;">Graph Error</p>';
 }
 
-
-
 document.addEventListener("DOMContentLoaded", async function () {
   console.log("DOM fully loaded.");
 
   let backendId = null;
   let currentTodaysSteps = 0;
   let currentTodaysCalories = 0;
+  let currentDistanceCovered = 0;
+  let currentActiveMinutes = 0;
+  let weekProgress = 0;
 
   const weekArr = getWeekArray()
   let weekSteps = weekArr.map((day) => [day, 0]);
@@ -666,10 +669,16 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       if (result.success) {
         currentTodaysSteps = result.savedSteps;
-        weekSteps[weekSteps.length - 1][1] = result.savedSteps;
+        currentActiveMinutes = Math.ceil(result.savedSteps / 100);
+        currentDistanceCovered = currentTodaysSteps * 2.4;
+        weekSteps = weekSteps.map(day => day[0] === getTodayDateString() ? [day[0], result.savedSteps] : day);
+        weekProgress = weekSteps.reduce((acc, e) => acc + e[1], 0);
         editStepsMessage.textContent = "Saved!";
         setTimeout(() => {
           showStepsDisplayMode(currentTodaysSteps);
+          updateMetric("weekly-progress", weekProgress, "steps this week");
+          updateMetric("distance-covered", currentDistanceCovered, "feet");
+          updateMetric("active-minutes", currentActiveMinutes, "mins");
           drawChart();
         }, 1000);
       } else {
@@ -746,6 +755,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         const calorieMetric = await loadTodaysCalorieData(backendId);
         todaysMetrics.calories = calorieMetric.calories; 
 
+        const weekStepData = await getWeekStepData(backendId);
+
+        if (weekStepData) {
+          weekSteps = weekStepData;
+          weekProgress = weekStepData.reduce((acc, e) => acc + e[1], 0);
+          todaysMetrics.weekSteps = weekProgress
+        }
+
         if (todaysMetrics) {
           currentTodaysSteps = todaysMetrics.steps;
           currentTodaysCalories = todaysMetrics.calories;
@@ -757,11 +774,6 @@ document.addEventListener("DOMContentLoaded", async function () {
           console.warn("Initial load for today's metrics failed.");
         }
 
-        const weekStepData = await getWeekStepData(backendId);
-
-        if (weekStepData) {
-          weekSteps = weekStepData;
-        }
 
         if (staticData === null) {
           console.warn(
@@ -848,8 +860,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
-  const week = getWeekArray();
-
   // Load the Visualization API and the piechart package.
   google.charts.load('current', {'packages':['corechart']});
 
@@ -862,10 +872,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   function drawChart() {
     // Create the data table.
     let data = new google.visualization.DataTable();
-    let steps = 100;
     data.addColumn('string', 'Date');
     data.addColumn('number', 'Step Count');
-    const entries = 
     data.addRows(weekSteps);
 
     // Set chart options
