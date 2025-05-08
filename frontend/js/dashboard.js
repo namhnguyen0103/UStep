@@ -437,13 +437,15 @@ async function displayDashboardData(todaysMetrics, staticData, backendId) {
     calories: 0,
     distance: 0,
     activeMinutes: 0,
+    weekSteps: 0
   };
 
   // Update basic metrics
-  updateMetric("total-steps-today", safeMetrics.steps, "steps");
-  updateMetric("calories-burned", safeMetrics.calories, "kcal");
+  updateMetric("display-steps-container", safeMetrics.steps, "steps");
+  updateMetric("display-calories-container", safeMetrics.calories, "kcal");
   updateMetric("distance-covered", safeMetrics.distance, "km");
   updateMetric("active-minutes", safeMetrics.activeMinutes, "mins");
+  updateMetric("weekly-progress", safeMetrics.weekSteps, "steps this week");
 
   // Handle edit button state
   const editBtn = document.getElementById("edit-steps-button");
@@ -483,11 +485,6 @@ async function displayDashboardData(todaysMetrics, staticData, backendId) {
   // Update other metrics if static data is available
   if (staticData) {
     updateMetric("daily-step-trend", safeMetrics.steps, "steps today");
-    updateMetric(
-      "weekly-progress",
-      staticData.weeklyTotalSteps ?? "---",
-      "steps this week"
-    );
     updateElementText(
       "best-streak",
       staticData.bestStreak?.toLocaleString() ?? "---"
@@ -540,12 +537,12 @@ function displayErrorState(message = "Could not load dashboard data.") {
   if (leaderboardBody) {
     leaderboardBody.innerHTML = `<tr><td colspan="3">${message}</td></tr>`;
   }
-  updateMetric("daily-step-trend", "Error", "");
+  // updateMetric("daily-step-trend", "Error", "");
   updateMetric("weekly-progress", "Error", "");
   updateElementText("best-streak", "Error");
   updateElementText("record-steps", "Error");
-  updateElementText("steps-source-value", "Error");
-  updateElementText("last-sync-value", "Error");
+  // updateElementText("steps-source-value", "Error");
+  // updateElementText("last-sync-value", "Error");
 
   const dailyGraph = document.getElementById("daily-trend-graph");
   if (dailyGraph)
