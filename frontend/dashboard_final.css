@@ -416,3 +416,35 @@ body {
   font-style: italic;
   text-align: center;
 }
+
+#current-friends li.friend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+#current-friends li.friend-item .user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+#current-friends li.friend-item .friend-steps {
+  margin-left: 1rem;
+}
+
+#friend-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+#friend-list li .user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+#friend-list li .friend-steps {
+  margin-left: 1rem;
+}

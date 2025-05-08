@@ -1,5 +1,17 @@
 import { BACKEND_URL } from "./config.js";
 
+async function fetchUserSteps(userId, stepsSpan) {
+  const today = new Date().toISOString().split("T")[0];
+  const stepsUrl = `${BACKEND_URL}/api/profiles/${userId}/steps?start=${today}&end=${today}`;
+  try {
+    const data = await fetchApi(stepsUrl);
+    const todaySteps = Array.isArray(data) && data.length > 0 ? data[0].steps : 0;
+    stepsSpan.textContent = `${todaySteps} steps today`;
+  } catch (err) {
+    stepsSpan.textContent = "Steps N/A";
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const friendTabBar = document.getElementById("friend-side-bar");
   const friendTabBarButton = document.getElementById("friend-side-bar-button");
@@ -81,44 +93,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function displaySearchResults(users) {
     searchResultsList.innerHTML = ""; // clear previous results/loading
-
+  
     if (!users || users.length === 0) {
       searchResultsList.innerHTML = `<li>No users found.</li>`;
       return;
     }
-
-    // don't show current user
+  
     const filteredUsers = users.filter((user) => user.id !== currentUserId);
-
+  
     if (filteredUsers.length === 0) {
       searchResultsList.innerHTML = `<li>No other users found.</li>`;
       return;
     }
-
+  
     filteredUsers.forEach((user) => {
       const li = document.createElement("li");
       const isAlreadyFriend = currentFriendsIds.has(user.id);
-
+  
       li.innerHTML = `
         <div class="user-info">
           <span>${user.first_name || ""} ${user.last_name || ""}</span>
           <span class="user-email">${user.email}</span>
+          <span class="user-steps">Loading…</span>
         </div>
-        <button class="add-friend-button" data-friend-id="${user.id}" ${
-        isAlreadyFriend ? "disabled" : ""
-      }>
+        <button class="add-friend-button" data-friend-id="${user.id}" ${isAlreadyFriend ? "disabled" : ""}>
           ${isAlreadyFriend ? "Friend" : "Add"}
         </button>
       `;
-
+  
       const addButton = li.querySelector(".add-friend-button");
       if (addButton && !isAlreadyFriend) {
         addButton.addEventListener("click", handleAddFriendClick);
       }
-
+  
       searchResultsList.appendChild(li);
+  
+      // ← NEW: fetch and display this user’s steps
+      const stepsSpan = li.querySelector(".user-steps");
+      fetchUserSteps(user.id, stepsSpan);
     });
   }
+  
 
   const debouncedSearch = debounce(searchUsers, 500);
 
@@ -132,31 +147,31 @@ document.addEventListener("DOMContentLoaded", function () {
   async function handleAddFriendClick(event) {
     const button = event.target;
     const friendId = button.dataset.friendId;
-
+  
     if (!currentUserId || !friendId) {
       alert("Error: Cannot add friend. User or friend ID missing.");
       return;
     }
-
+  
     console.log(
       `Attempting to add friend: ${friendId} for user: ${currentUserId}`
     );
     button.disabled = true;
     button.textContent = "Adding...";
-
+  
     const addFriendUrl = `${BACKEND_URL}/api/friendships`;
     const payload = {
       userId: currentUserId,
       friendId: friendId,
     };
-
+  
     try {
       await fetchApi(addFriendUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
+  
       console.log("Friend added successfully via API.");
       button.textContent = "Friend";
       currentFriendsIds.add(friendId);
@@ -164,12 +179,16 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (error) {
       console.error("Error adding friend:", error);
       alert(`Could not add friend: ${error.message}`);
-      if (!error.message.toLowerCase().includes("already exists")) {
+      if (error.message.toLowerCase().includes("already exists")) {
+        // If it's already there, just reload the list
+        loadFriends();
+      } else {
         button.disabled = false;
       }
       button.textContent = "Add";
     }
   }
+  
 
   async function loadFriends() {
     if (!currentUserId) {
@@ -195,15 +214,15 @@ document.addEventListener("DOMContentLoaded", function () {
   function displayFriends(friendships) {
     friendList.innerHTML = "";
     currentFriendsIds.clear();
-
+  
     if (!friendships || friendships.length === 0) {
       friendList.innerHTML = `<li>You haven't added any friends yet.</li>`;
       return;
     }
-
+  
     friendships.forEach((friendship) => {
       let friendProfile = null;
-
+  
       if (friendship.profile) {
         friendProfile = friendship.profile;
       } else if (
@@ -219,30 +238,29 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (friendship.id && friendship.email) {
         friendProfile = friendship;
       }
-
+  
       if (friendProfile && friendProfile.id) {
         currentFriendsIds.add(friendProfile.id);
+  
         const li = document.createElement("li");
+        li.classList.add("friend-item");
         li.innerHTML = `
           <div class="user-info">
-            <span>${friendProfile.first_name || ""} ${
-          friendProfile.last_name || ""
-        }</span>
+            <span>${friendProfile.first_name || ""} ${friendProfile.last_name || ""}</span>
             <span class="user-email">${friendProfile.email}</span>
           </div>
-          <!-- <button class="remove-friend-button" data-friendship-id="${
-            friendship.friendship ? friendship.friendship.id : friendship.id
-          }">Remove</button> -->
+          <span class="friend-steps">Loading…</span>
         `;
         friendList.appendChild(li);
-      } else {
-        console.warn(
-          "Could not determine friend profile structure in friendship record:",
-          friendship
-        );
+  
+        // fetch & display that friend's steps
+        const stepsSpan = li.querySelector(".friend-steps");
+        fetchUserSteps(friendProfile.id, stepsSpan);
       }
     });
   }
+  
+  
 
   function openFriendSideBar() {
     if (friendTabBar) {
