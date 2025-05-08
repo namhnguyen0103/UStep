@@ -10,6 +10,7 @@ import mainRouter, {
   metricRoutes,
   stepRoutes,
   calorieRoutes,
+  leaderboardRoutes,
 } from './routes/index.js';
 import { errorHandler } from './utils/helpers.js';
 import { initDatabase } from './data/config/init.js';
@@ -17,13 +18,13 @@ import { initDatabase } from './data/config/init.js';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// CORS
-app.use(
-  cors({
-    origin: '*', // allow all origins
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  }),
-);
+// Move these to the top with other middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: '*', // allow all origins
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+}));
 
 // @ts-ignore
 const logger = pinoHttp({
@@ -31,25 +32,23 @@ const logger = pinoHttp({
   transport:
     process.env.NODE_ENV !== 'production'
       ? {
-          target: 'pino-pretty',
-          options: { singleLine: true },
-        }
+        target: 'pino-pretty',
+        options: { singleLine: true },
+      }
       : undefined,
   level: process.env.LOG_LEVEL || 'info',
 });
 app.use(logger);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
+// Register all routes
 app.use('/api', mainRouter);
-
 app.use('/api/profiles/:userId/metrics', metricRoutes);
 app.use('/api/profiles/:userId/steps', stepRoutes);
 app.use('/api/profiles/:userId/calories', calorieRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
+// Error handlers should be last
 app.use(errorHandler);
-
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: 'Not Found' });
 });
